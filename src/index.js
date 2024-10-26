@@ -1,13 +1,34 @@
 import React from "react";
-import ReactDOM from "react-dom/client";
-import "./index.css";
+import * as ReactDOM from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
+import "./index.css";
+import ErrorPage from "./pages/error/error";
+import CallerIdsPage from "./pages/callerIds/callerIds";
+import HomePage from "./pages/home/home";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "/",
+        element: <HomePage />,
+      },
+      {
+        path: "/add-caller-id",
+        element: <CallerIdsPage />,
+      },
+    ],
+  },
+]);
+
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <App />
+    <RouterProvider router={router} />
   </React.StrictMode>
 );
 
