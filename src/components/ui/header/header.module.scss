@@ -1,0 +1,32 @@
+.header {
+    background-color: #e0dede !important;
+    position: sticky;
+    top: 0;
+    z-index: 999999999;
+
+    .nav {
+        /* Link text color */
+        text-decoration: none;
+        /* Remove underline */
+        padding: 10px 15px;
+        /* Padding around links */
+        border-radius: 5px;
+        /* Rounded corners */
+        transition: background-color 0.3s, color 0.3s;
+        /* Smooth transition */
+
+        &:hover {
+            /* Darker background on hover */
+            color: #000;
+            /* Lighter text color on hover */
+        }
+
+        &.active {
+            /* Blue background for active link */
+            color: #000;
+            /* White text for active link */
+            font-weight: bold;
+            /* Bold text for active link */
+        }
+    }
+}

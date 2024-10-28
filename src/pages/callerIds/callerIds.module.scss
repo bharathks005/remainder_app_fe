@@ -1,13 +1,47 @@
-.CallerIdsPage {
+.CallerIdsContainer {
+    padding: 30px;
 
-    padding: 15px;
-    margin: 30px auto;
+    .action {
+        .backBtn {
+            width: fit-content;
+            display: flex;
+            align-items: center;
+            justify-self: start;
+        }
+    }
 
-    .retry {
+    .mainSection {
+        margin: 0 auto;
+        padding: 15px;
+
+        .badge {
+            width: fit-content;
+            padding: 10px;
+            margin: 15px auto;
+        }
+
+        .helperText {
+            margin: 10px 0;
+        }
+    }
+
+    .footer {
+        .retryBtn {
+            width: fit-content;
+            display: flex;
+            align-items: center;
+            justify-self: end;
+        }
+    }
+
+    .submit {
+        width: fit-content;
         margin: 15px auto;
     }
 }
 
-.back {
-    margin: 15px auto;
+@media only screen and (max-width: 768px) {
+    .CallerIdsContainer {
+        padding: 30px;
+    }
 }

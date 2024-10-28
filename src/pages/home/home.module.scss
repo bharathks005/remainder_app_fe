@@ -1,15 +1,45 @@
-.home {
-    padding: 30px;
-    margin: 30px auto;
-    align-items: baseline;
+.homeContainer {
+    .schedule {
+        .scheduleContainer {
+            padding: 0 30px;
+            margin: 30px auto;
+            align-items: baseline;
+            gap: 15px;
 
-   
+            .scheduleBtn {
+                width: fit-content;
+                margin: 0 auto;
+                margin-top: 15px;
+
+                span {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                }
+            }
+        }
+    }
+
+    .register {
+        .title {
+            padding: 30px 0;
+        }
+    }
 }
 
-.resync{
-    display: flex;
-    /* align-items: end; */
-    justify-content: end;
-    /* padding-right: 30px; */
-    margin: 30px;
+
+@media only screen and (max-width: 768px) {
+    .scheduleContainer {
+        flex-wrap: wrap !important;
+    }
+}
+
+.inactive {
+    position: relative;
+    margin: 30px auto;
+
+    .title {
+        font-size: 24px;
+        font-weight: 500;
+    }
 }
