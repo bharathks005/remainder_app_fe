@@ -1,27 +1,30 @@
-import { Button, Card, Label, TextInput } from "flowbite-react";
-import { useCallback, useState, useEffect } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { addToast } from '../../store/toastSlice';
-import { addCallerId, removeCallerId } from '../../store/callerIdsSlice';
+import { addCallerId, removeCallerId, updateScheduleData, deleteScheduleData } from '../../store/callerIdsSlice';
 import classes from './home.module.scss';
-import { Spinner } from "flowbite-react";
+import { Spinner, Timeline, Textarea, Button, Card, Label, TextInput } from "flowbite-react";
 import validateDateTimePicker from '../../helper/dateValidation';
 import CallerTableComponent from '../../components/callerTable/callerTable';
 import { HiClock } from "react-icons/hi";
 import CallerIdsPage from '../callerIds/callerIds';
-
 import {
 	getCallerIdsApiController,
 	scheduleCallApiController,
-	deleteCallerIdApiController
+	deleteCallerIdApiController,
+	getScheduleApiController,
+	deleteScheduleCallApiController
 } from '../../utils/api/caller-ids.api';
 
 export default function HomePage() {
 	const dispatch = useDispatch();
 	const user = useSelector(state => state.user.user);
+	const { upCommingSchedule = [], pastSchedule = [] } = useSelector(state => state.callerId.scheduledData);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isTableLoading, setIsTableLoading] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
+	const dateInput = useRef(null);
+	const notesInput = useRef(null);
 
 	const showToast = useCallback((type, message) => {
 		dispatch(addToast({
@@ -30,6 +33,17 @@ export default function HomePage() {
 			message
 		}));
 	}, [dispatch]);
+
+	const getScheduleData = async () => {
+		const res = await getScheduleApiController();
+		if (res.status !== 200) {
+			showToast('error', 'Failed to get scheduled Data');
+			return;
+		}
+		const { upCommingSchedule = [], pastSchedule = [] } = res.data;
+
+		dispatch(updateScheduleData({ upCommingSchedule, pastSchedule }));
+	}
 
 	useEffect(() => {
 		try {
@@ -44,9 +58,11 @@ export default function HomePage() {
 					dispatch(addCallerId([...callerIds]));
 				}
 			}
+
 			return () => {
 				if (user?.approved) {
 					getCallerIds();
+					getScheduleData();
 				}
 			}
 		} catch (e) {
@@ -59,6 +75,7 @@ export default function HomePage() {
 		e.preventDefault();
 		const formData = new FormData(e.target);
 		const date = formData.get("dateAndTime");
+		const notes = formData.get("notes");
 		const validateDate = validateDateTimePicker(date);
 		if (!validateDate.isValid) {
 			setErrorMessage(validateDate.error);
@@ -67,14 +84,17 @@ export default function HomePage() {
 		setErrorMessage('');
 		setIsLoading(true);
 		try {
-			const response = await scheduleCallApiController(date);
+			const response = await scheduleCallApiController({ date, notes });
 			if (response.status !== 200) {
 				setIsLoading(false);
 				showToast('error', 'Failed to schedule call');
 				return;
 			}
 			showToast('success', 'Scheduled Call Successfully!!');
+			getScheduleData();
 			setIsLoading(false);
+			dateInput.current.value = '';
+			notesInput.current.value = '';
 		} catch (e) {
 			setIsLoading(false);
 			showToast('error', 'Failed to schedule call');
@@ -90,6 +110,16 @@ export default function HomePage() {
 		}
 		setIsTableLoading(false);
 		dispatch(removeCallerId(ids));
+	}
+
+	const deleteSchedule = async (id) => {
+		const res = await deleteScheduleCallApiController(id)
+		if (res.status !== 200) {
+			showToast('error', 'Failed to delete Schedule');
+			return;
+		}
+		setIsTableLoading(false);
+		dispatch(deleteScheduleData(id));
 	}
 	return <>
 		{
@@ -108,18 +138,44 @@ export default function HomePage() {
 											<div className="mb-2 block text-left">
 												<Label htmlFor="dateAndTime" value="Date And Time" />
 											</div>
-											<TextInput name="dateAndTime" id="dateAndTime" type="datetime-local" required
+											<TextInput ref={dateInput} name="dateAndTime" id="dateAndTime" type="datetime-local" required
 												color={errorMessage ? "failure" : ""}
 												helperText={
 													errorMessage ? <span className="font-medium" >{errorMessage}</span> : ""
 												}
 											/>
 										</div>
+										<div>
+											<div className="mb-2 block text-left">
+												<Label htmlFor="notes" value="Notes" />
+											</div>
+											<Textarea ref={notesInput} id="notes" name="notes" placeholder="Leave a comment..." required rows={4} />
+										</div>
 										<Button type="submit" color="dark" className={classes.scheduleBtn} disabled={isLoading}>
 											{
 												isLoading ? <Spinner color="info" aria-label="loading state" /> : <span> <HiClock /> Schedule Call 	</span>}
 										</Button>
 									</form>
+
+									<div className={classes.upcommingSchedule}>
+										<Timeline>
+											{
+												upCommingSchedule.map(({ date, notes, scheduleName }, index) => <Timeline.Item key={`timeline-indx-${index + 1}`}>
+													<Timeline.Point />
+													<Timeline.Content>
+														<Timeline.Time>{date}</Timeline.Time>
+														<Timeline.Body>
+															{notes}
+														</Timeline.Body>
+														<Button color="gray" onClick={() => deleteSchedule(scheduleName)}>
+															Cancel
+														</Button>
+													</Timeline.Content>
+												</Timeline.Item>)
+											}
+										</Timeline>
+
+									</div>
 								</Card>
 							</div>
 							<div className="flex flex-col items-center justify-center w-full md:w-1/2">
