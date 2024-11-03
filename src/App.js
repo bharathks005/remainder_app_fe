@@ -14,6 +14,16 @@ function App() {
     const user = useSelector(state => state.user.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    let socket;  
+
+    // // Send a message to the server
+    // const sendMessage = () => {
+    //     if (socket && input) {
+    //         socket.send(input);
+    //         setInput('');
+    //     }
+    // };
+
     useEffect(() => {
         setIsLoading(true);
         const getUser = async () => {
@@ -31,9 +41,32 @@ function App() {
             }
             setIsLoading(false);
         }
+        // Initialize WebSocket connection
+        socket = new WebSocket(`ws://${process.env.REACT_APP_SOCKET_URL}`);
+
+        // Handle incoming messages
+        socket.onmessage = (event) => {
+            // setMessages((prevMessages) => [...prevMessages, event.data]);
+            const { data } = event;
+            const message = JSON.parse(data);
+            console.log(message.data, 'data')
+        };
+
+        socket.onopen = (event) => {
+            // setMessages((prevMessages) => [...prevMessages, event.data]);
+            console.log('WebSocket opened!');
+        };
+
+        // Handle socket close
+        socket.onclose = () => console.log('Disconnected from WebSocket server');
+
+        // Handle socket errors
+        socket.onerror = (error) => console.log('WebSocket error:', error);
+
         return () => {
             getUser();
         }
+
     }, [dispatch, navigate]);
 
     const handleLogout = async () => {
