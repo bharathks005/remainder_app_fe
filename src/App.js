@@ -8,21 +8,14 @@ import { getUserApiController, logoutUserApiController } from './utils/api/user.
 import { useSelector, useDispatch } from 'react-redux';
 import { updateUser, removeUser } from './store/userSlice';
 import { Spinner } from "flowbite-react";
+import { updateCallerIdsStatus } from './store/callerIdsSlice';
 
 function App() {
     const [isLoading, setIsLoading] = useState(false);
     const user = useSelector(state => state.user.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    let socket;  
 
-    // // Send a message to the server
-    // const sendMessage = () => {
-    //     if (socket && input) {
-    //         socket.send(input);
-    //         setInput('');
-    //     }
-    // };
 
     useEffect(() => {
         setIsLoading(true);
@@ -41,33 +34,67 @@ function App() {
             }
             setIsLoading(false);
         }
-        // Initialize WebSocket connection
-        socket = new WebSocket(`ws://${process.env.REACT_APP_SOCKET_URL}`);
-
-        // Handle incoming messages
-        socket.onmessage = (event) => {
-            // setMessages((prevMessages) => [...prevMessages, event.data]);
-            const { data } = event;
-            const message = JSON.parse(data);
-            console.log(message.data, 'data')
-        };
-
-        socket.onopen = (event) => {
-            // setMessages((prevMessages) => [...prevMessages, event.data]);
-            console.log('WebSocket opened!');
-        };
-
-        // Handle socket close
-        socket.onclose = () => console.log('Disconnected from WebSocket server');
-
-        // Handle socket errors
-        socket.onerror = (error) => console.log('WebSocket error:', error);
-
         return () => {
             getUser();
         }
 
     }, [dispatch, navigate]);
+
+    useEffect(() => {
+        let socket;
+        let timer;
+        let attemptCount = 0;       
+        const connect = () => {
+            socket = new WebSocket(`ws://${process.env.REACT_APP_SOCKET_URL}`);
+            socket.onopen = (event) => {
+                console.log('Connected Successfully!!');
+                if (timer) {
+                    clearInterval(timer);
+                    attemptCount = 0;
+                }
+                console.log('attemptCount', attemptCount);
+            };
+
+            // Handle incoming messages
+            socket.onmessage = (event) => {
+                const { data } = event;
+                const message = JSON.parse(data);
+                if (message.type === 'CREATE_CALLERIDS') {
+                    console.log(data, 'data');
+                    dispatch(updateCallerIdsStatus({ status: message.status, data: message.data }));
+                }
+            };
+
+            // Handle socket close
+            socket.onclose = () => {
+                console.log('Disconnected from WebSocket server');
+                retryAttempt();
+            };
+
+            // Handle socket errors
+            socket.onerror = (error) => {
+                console.log('WebSocket error:', error);
+                retryAttempt();
+            };
+        }
+
+        const retryAttempt = () => {
+            timer = setInterval(() => {
+                if (attemptCount < 20) {
+                    connect();
+                    attemptCount++;
+                } else {
+                    clearInterval(timer);
+                    attemptCount = 0;
+                }
+            }, 5000);
+        }
+
+        return () => {
+            connect();
+        }
+
+    }, [dispatch]);
 
     const handleLogout = async () => {
         const res = await logoutUserApiController();

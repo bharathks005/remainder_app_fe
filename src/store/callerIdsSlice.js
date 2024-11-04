@@ -4,7 +4,8 @@ const callerIdsSlice = createSlice({
     name: 'callerId',
     initialState: {
         callerIds: [],
-        scheduledData: {}
+        scheduledData: {},
+        createCallerIdsStatus: {}
     },
     reducers: {
         addCallerId: (state, action) => {
@@ -24,9 +25,16 @@ const callerIdsSlice = createSlice({
             const { id } = action.payload;
             state.scheduledData.upCommingSchedule = state.scheduledData.upCommingSchedule.filter((item) => item.scheduleName === id);
         },
+        updateCallerIdsStatus: (state, action) => {
+            const { status, type, data } = action.payload;
+            state.createCallerIdsStatus = { status, type, data };
+        },
+        resetCreateCallerIdsStatus: (state, action) => {
+            state.createCallerIdsStatus = {};
+        },
 
     }
 });
 
-export const { addCallerId, removeCallerId, updateScheduleData, deleteScheduleData } = callerIdsSlice.actions;
+export const { addCallerId, removeCallerId, updateScheduleData, deleteScheduleData, updateCallerIdsStatus, resetCreateCallerIdsStatus } = callerIdsSlice.actions;
 export default callerIdsSlice.reducer;

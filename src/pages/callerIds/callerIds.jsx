@@ -7,12 +7,14 @@ import { HiOutlineArrowLeft } from "react-icons/hi";
 import { Spinner } from "flowbite-react";
 import { craeteCallerIdApiController } from '../../utils/api/caller-ids.api';
 import { addToast } from '../../store/toastSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+const { resetCreateCallerIdsStatus } = require('../../store/callerIdsSlice');
 
-export default function CallerIdsPage() {
+export default function CallerIdsPage({ user = {} }) {
 	const [errorMessage, setErrorMessage] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [verificationCode, setVerificationCode] = useState("");
+	const createCallerIdsStatus = useSelector(state => state.callerId.createCallerIdsStatus);
 	const dispatch = useDispatch();
 
 	const showToast = (type, message) => {
@@ -27,7 +29,7 @@ export default function CallerIdsPage() {
 		e.preventDefault();
 		const formData = new FormData(e.target);
 		const data = {
-			name: formData.get("friendly_name"),
+			name: user?.name || '',
 			phone: `91${formData.get("phone_number")}`,
 		};
 		const phoneRegex = /^[6-9]\d{9}$/;
@@ -74,6 +76,9 @@ export default function CallerIdsPage() {
 								icon={HiMail}
 								name="friendly_name"
 								placeholder="Friendly Name"
+								value={user?.name ? user?.name : ''}
+								readOnly={true}
+								disabled
 								required
 							/>
 						</div>
@@ -96,33 +101,68 @@ export default function CallerIdsPage() {
 					</form>
 				) : (
 					<>
-						<div className={`${classes.action} max-w-md`}>
-							<Button color="light" className={classes.backButton} onClick={() => {
-								setVerificationCode(null);
-							}}>
-								<HiOutlineArrowLeft className="h-5 w-5" />
-								<span className="ml-2">Back</span> </Button>
-						</div>
+						{
+
+							<div className={`${classes.action} max-w-md`}>
+								<Button color="light" className={classes.backButton} onClick={() => {
+									setVerificationCode(null);
+									dispatch(resetCreateCallerIdsStatus(null));
+
+								}}>
+									<HiOutlineArrowLeft className="h-5 w-5" />
+									<span className="ml-2">Back</span> </Button>
+							</div>
+						}
+
 						<div className={classes.mainSection}>
-							<h4 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-								You Will get a Call Soon!
-							</h4>
-							<h6 className={`${classes.helperText} text-sm tracking-tight text-gray-900 dark:text-white my-2`}>
-								Please enter the Verification Code
-							</h6>
-							<Badge color="success" size="lg" className={classes.badge}>
-								{verificationCode}
-							</Badge>
-							<span className="text-1xl font-bold">{ }</span>
+							{
+								createCallerIdsStatus?.status === 'success' ? <>
+									<h6 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+										Caller Id added successfully! Thank You!
+									</h6>
+								</> : <>
+									{
+										createCallerIdsStatus?.status === 'failed' ? <>
+											<h4 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+												Please Try again!
+											</h4>
+											{
+												createCallerIdsStatus?.data?.status === 'no-answer' && <h6 className={`${classes.helperText} text-sm tracking-tight text-gray-900 dark:text-white my-2`}>
+													User not answer the call.
+												</h6>
+											}
+											{/* {
+												createCallerIdsStatus?.data?.status === 'failed' && <h6 className={`${classes.helperText} text-sm tracking-tight text-gray-900 dark:text-white my-2`}>
+												User not answer the call.
+											</h6>
+											} */}
+										</> : <>
+											<h4 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+												You Will get a Call Soon!
+											</h4>
+											<h6 className={`${classes.helperText} text-sm tracking-tight text-gray-900 dark:text-white my-2`}>
+												Please enter the Verification Code
+											</h6>
+											<Badge color="success" size="lg" className={classes.badge}>
+												{verificationCode}
+											</Badge>
+										</>
+									}
+								</>
+							}
 						</div>
-						<div className={classes.footer}>
-							<Button color="dark" className={classes.retryBtn} onClick={() => {
-								setVerificationCode(null);
-							}}> Retry </Button>
-						</div>
+						{
+							createCallerIdsStatus?.status === 'failed' && <div className={classes.footer}>
+								<Button color="dark" className={classes.retryBtn} onClick={() => {
+									dispatch(resetCreateCallerIdsStatus(null));
+									setVerificationCode(null);
+								}}> Retry </Button>
+							</div>
+						}
+
 					</>
 				)}
 			</Card>
-		</div>
+		</div >
 	);
 }
