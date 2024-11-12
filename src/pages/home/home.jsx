@@ -16,7 +16,7 @@ import {
 	deleteScheduleCallApiController
 } from '../../utils/api/caller-ids.api';
 
-export default function HomePage() {
+export default function HomePage({isConnected}) {
 	const dispatch = useDispatch();
 	const user = useSelector(state => state.user.user);
 	const { upCommingSchedule = [], pastSchedule = [] } = useSelector(state => state.callerId.scheduledData);
@@ -60,22 +60,21 @@ export default function HomePage() {
 
 	useEffect(() => {
 		try {			
-			return () => {
-				if (user?.admin) {
-					getCallerIds();
-					getScheduleData();
-				}
+			if (user?.admin) {
+				getCallerIds();
+				getScheduleData();
 			}
 		} catch (e) {
 			console.error(e);
 			showToast('error', 'Failed to get callIds');
 		}
-	}, [user, showToast]);
+		console.log(isConnected, 'isConnected');
+	}, [user]);
 
 	useEffect(() => {
 		if (createCallerIdsStatus?.status === 'success') {
 			getCallerIds();
-		}	
+		}		
 	}, [createCallerIdsStatus?.status])
 
 	const scheduleCallHandler = async (e) => {
@@ -92,7 +91,6 @@ export default function HomePage() {
 		setIsLoading(true);
 		try {
 			const response = await scheduleCallApiController({ date, notes });
-			console.log('loading!!!!!', response)
 
 			if (response.status !== 200) {
 				setIsLoading(false);

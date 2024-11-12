@@ -7,25 +7,13 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import "./index.css";
 import ErrorPage from "./pages/error/error";
-import CallerIdsPage from "./pages/callerIds/callerIds";
-import HomePage from "./pages/home/home";
 import LoginPage from './pages/login/login';
 
 const router = createBrowserRouter([
 	{
 		path: "/",
 		element: <App />,
-		errorElement: <ErrorPage />,
-		children: [
-			{
-				path: "/",
-				element: <HomePage />,
-			},
-			{
-				path: "/add-caller",
-				element: <CallerIdsPage />,
-			},
-		],
+		errorElement: <ErrorPage />,		
 	},
 	{
 		path: "/login",
