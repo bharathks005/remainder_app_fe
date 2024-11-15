@@ -51,5 +51,7 @@
   "description": "",
   "main": "postcss.config.js",
   "author": "",
-  "license": "ISC"  
+  "license": "ISC",
+  "start_url": "/",
+  "homepage": "."
 }

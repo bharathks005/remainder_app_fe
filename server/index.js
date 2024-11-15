@@ -15,7 +15,7 @@ app.get('*', function (req, res) {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`port---> ${PORT}`);
   // ngrok.connect({ addr: PORT, authtoken: process.env.NGROK_TOKEN })
   //   .then(listener => {
   //     console.log(`Ingress established at: ${listener.url()}`);
