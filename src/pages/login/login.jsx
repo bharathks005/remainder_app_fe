@@ -1,7 +1,7 @@
 import classes from './login.module.scss';
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from 'react';
-import { authApiController } from '../../utils/api/user.api';
+import { getUserApiController } from '../../utils/api/user.api';
 import { Spinner } from "flowbite-react";
 
 export default function LoginPage() {
@@ -9,7 +9,7 @@ export default function LoginPage() {
     const navigate = useNavigate();
     useEffect(() => {
         const authUser = async () => {
-            const res = await authApiController();
+            const res = await getUserApiController();
             setIsLoading(false);
             if (res.status !== 200) {
                 return
@@ -22,7 +22,7 @@ export default function LoginPage() {
     }, [navigate]);
 
     const onLoginHandler = () => {
-        window.open(`${process.env.REACT_APP_API_URL}/auth/google`, '_self');
+        window.open(`${process.env.REACT_APP_API_URL}/api/auth/google/login`, '_self');
     }
 
     return <div className={classes.body}>
