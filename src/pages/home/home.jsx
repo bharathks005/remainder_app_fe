@@ -69,7 +69,7 @@ export default function HomePage({isConnected}) {
 			showToast('error', 'Failed to get callIds');
 		}
 		console.log(isConnected, 'isConnected');
-	}, [user, getCallerIds, getScheduleData, isConnected, showToast]);
+	}, [user]);
 
 	useEffect(() => {
 		if (createCallerIdsStatus?.status === 'success') {
