@@ -1,5 +1,5 @@
 # Use an official Node runtime as a base image
-FROM node:17-alpine
+FROM node:18
 
 # Set the working directory in the container
 WORKDIR /.
@@ -15,8 +15,8 @@ COPY . .
 # Build the frontend app
 RUN npm run build
 
-# Expose port 3000 to the outside world
-EXPOSE 3000
+# Expose port 500 to the outside world
+EXPOSE 5000
 
 # Command to run the application
 CMD ["npm", "start"]

@@ -7,7 +7,7 @@ function useWebSocket(url, options = {}) {
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef(null);
   const reconnectAttempts = useRef(0);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch();  
 
   const connect = useCallback(() => {
     // Create WebSocket instance
@@ -38,7 +38,7 @@ function useWebSocket(url, options = {}) {
     };
 
     wsRef.current = ws;
-  }, [url]);
+  }, [url, dispatch]);
 
   const reconnect = useCallback(() => {
     if (reconnectAttempts.current < maxReconnectAttempts) {
@@ -50,11 +50,11 @@ function useWebSocket(url, options = {}) {
     } else {
       console.error('Max reconnect attempts reached. Giving up.');
     }
-  }, [connect, reconnectInterval, maxReconnectAttempts]);
+  }, [reconnectInterval, maxReconnectAttempts]);
+  
 
   useEffect(() => {
     connect();
-
     return () => {
       if (wsRef.current) {
         wsRef.current.close();

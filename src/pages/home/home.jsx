@@ -19,7 +19,7 @@ import {
 export default function HomePage({isConnected}) {
 	const dispatch = useDispatch();
 	const user = useSelector(state => state.user.user);
-	const { upCommingSchedule = [], pastSchedule = [] } = useSelector(state => state.callerId.scheduledData);
+	const { upCommingSchedule = [] } = useSelector(state => state.callerId.scheduledData);
 	const createCallerIdsStatus = useSelector(state => state.callerId.createCallerIdsStatus);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isTableLoading, setIsTableLoading] = useState(false);
@@ -69,13 +69,13 @@ export default function HomePage({isConnected}) {
 			showToast('error', 'Failed to get callIds');
 		}
 		console.log(isConnected, 'isConnected');
-	}, [user]);
+	}, [user, getCallerIds, getScheduleData, isConnected, showToast]);
 
 	useEffect(() => {
 		if (createCallerIdsStatus?.status === 'success') {
 			getCallerIds();
 		}		
-	}, [createCallerIdsStatus?.status])
+	}, [createCallerIdsStatus?.status, getCallerIds])
 
 	const scheduleCallHandler = async (e) => {
 		e.preventDefault();

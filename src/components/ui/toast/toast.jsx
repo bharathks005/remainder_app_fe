@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { removeToast } from '../../../store/toastSlice';
 import { Toast } from 'flowbite-react';
-import { HiCheck, HiExclamation, HiX } from "react-icons/hi";
+import { HiCheck, HiExclamation } from "react-icons/hi";
 import classes from './toast.module.scss';
 
 export default function ToastComponent() {

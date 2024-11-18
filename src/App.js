@@ -23,25 +23,26 @@ function App() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const getUser = async () => {
-        if (!user) {
-            const res = await getUserApiController();
-            if (res.status !== 200) {
-                navigate('/login');
-                return
-            }
-            const user = res.data;
-            const { name, email, picture, admin, approved } = user;
-            if (email) {
-                dispatch(updateUser({
-                    name, email, picture, admin, approved
-                }));
-            }
-            setIsLoading(false);
-        }
-    }
+    
 
     useEffect(() => {
+        const getUser = async () => {
+            if (!user) {
+                const res = await getUserApiController();
+                if (res.status !== 200) {
+                    navigate('/login');
+                    return
+                }
+                const user = res.data;
+                const { name, email, picture, admin, approved } = user;
+                if (email) {
+                    dispatch(updateUser({
+                        name, email, picture, admin, approved
+                    }));
+                }
+                setIsLoading(false);
+            }
+        }
         getUser();
     }, []);
 
