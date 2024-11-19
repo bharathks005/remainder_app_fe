@@ -35,7 +35,8 @@ export default function CallerTableComponent({ isLoading, deleteCallerIDHandler 
                     Delete
                 </Button>
             </div> : ''}
-            <div className={classes.table}>
+            {
+                callerIds.length ?  <div className={classes.table}>
                 <Table>
                     <Table.Head>
                         <Table.HeadCell className="p-4">
@@ -58,7 +59,9 @@ export default function CallerTableComponent({ isLoading, deleteCallerIDHandler 
 
                     </Table.Body>
                 </Table>
-            </div>
+            </div> : ""
+            }
+           
         </div>
     );
 }
