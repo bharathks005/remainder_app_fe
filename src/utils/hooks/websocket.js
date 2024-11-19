@@ -38,7 +38,7 @@ function useWebSocket(url, options = {}) {
     };
 
     wsRef.current = ws;
-  }, [url, dispatch]);
+  }, [url, dispatch]);  
 
   const reconnect = useCallback(() => {
     if (reconnectAttempts.current < maxReconnectAttempts) {

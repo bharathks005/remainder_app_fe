@@ -52,8 +52,8 @@ const callerIdsSlice = createSlice({
             state.scheduledData = { upCommingSchedule: newUpCommingSchedule, pastSchedule: newPastSchedule };
         },
         deleteScheduleData: (state, action) => {
-            const { id } = action.payload;
-            state.scheduledData.upCommingSchedule = state.scheduledData.upCommingSchedule.filter((item) => item.scheduleName === id);
+            const id  = action.payload;
+            state.scheduledData.upCommingSchedule = state.scheduledData.upCommingSchedule.filter((item) => item.scheduleName !== id);
         },
         updateCallerIdsStatus: (state, action) => {
             const { status, type, data } = action.payload;
