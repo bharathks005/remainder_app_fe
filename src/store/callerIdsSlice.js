@@ -18,8 +18,38 @@ const callerIdsSlice = createSlice({
             };
         },
         updateScheduleData: (state, action) => {
-            const { upCommingSchedule, pastSchedule } = action.payload;
-            state.scheduledData = { upCommingSchedule, pastSchedule };
+            const { upCommingSchedule = [], pastSchedule = []} = action.payload;
+            const newUpCommingSchedule = upCommingSchedule.map((item) => {               
+                return {
+                    ...item,
+                    date: new Date(item.date).toLocaleDateString('en-IN', {
+                    weekday: 'short', // Mon
+                    year: 'numeric',  // 2024
+                    month: 'long',    // November
+                    day: 'numeric',   // 19
+                    hour: 'numeric',   // "1"
+                    minute: 'numeric', // "45"
+                    second: 'numeric', // "00"
+                    hour12: true
+                }),
+                }
+            });
+            const newPastSchedule = pastSchedule.map((item) => {               
+                return {
+                    ...item,
+                    date: new Date(item.date).toLocaleDateString('en-IN', {
+                    weekday: 'short', // Mon
+                    year: 'numeric',  // 2024
+                    month: 'long',    // November
+                    day: 'numeric',   // 19
+                    hour: 'numeric',   // "1"
+                    minute: 'numeric', // "45"
+                    second: 'numeric', // "00"
+                    hour12: true
+                }),
+                }
+            });
+            state.scheduledData = { upCommingSchedule: newUpCommingSchedule, pastSchedule: newPastSchedule };
         },
         deleteScheduleData: (state, action) => {
             const { id } = action.payload;
