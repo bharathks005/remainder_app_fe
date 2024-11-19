@@ -162,14 +162,14 @@ export default function HomePage({isConnected}) {
 								<div className={classes.upcommingSchedule}>
 									<Timeline>
 										{
-											upCommingSchedule.map(({ date, notes, scheduleName }, index) => <Timeline.Item key={`timeline-indx-${index + 1}`}>
+											upCommingSchedule.map(({ date, notes, schedulerName }, index) => <Timeline.Item key={`timeline-indx-${index + 1}`}>
 												<Timeline.Point />
 												<Timeline.Content>
 													<Timeline.Time>{date}</Timeline.Time>
 													<Timeline.Body>
 														{notes}
 													</Timeline.Body>
-													<Button color="gray" onClick={() => deleteSchedule(scheduleName)}>
+													<Button color="gray" onClick={() => deleteSchedule(schedulerName)}>
 														Cancel
 													</Button>
 												</Timeline.Content>
