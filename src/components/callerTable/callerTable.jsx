@@ -22,7 +22,9 @@ export default function CallerTableComponent({ isLoading, deleteCallerIDHandler 
         }
     }
     const onDeleteHandler = async () => {
-        deleteCallerIDHandler(selectedId);
+        const result = await deleteCallerIDHandler(selectedId);
+        console.log(result, 'result');
+
     }
     return (
         <div className={`${classes.tableContainer} w-full`}>

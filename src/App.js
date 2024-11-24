@@ -18,7 +18,6 @@ function App() {
         reconnectInterval: 3000,
         maxReconnectAttempts: 5
     });
-    console.log(protocol, 'protocol')
     const user = useSelector(state => state.user.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -57,7 +56,7 @@ function App() {
     return (
         <div className="App">
             {
-                isLoading ? <Spinner color="info" aria-label="loading state" /> : <>
+                isLoading ? <div className="App-loading-icon"><Spinner color="info" aria-label="loading state" /></div> : <>
                     <div className="App-header">
                         <HeaderComponent user={user} logoutHandler={handleLogout} />
                     </div>

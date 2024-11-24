@@ -68,13 +68,12 @@ export default function HomePage({isConnected}) {
 			console.error(e);
 			showToast('error', 'Failed to get callIds');
 		}
-		console.log(isConnected, 'isConnected');
 	}, [user]);
 
 	useEffect(() => {
 		if (createCallerIdsStatus?.status === 'success') {
 			getCallerIds();
-		}		
+		}
 	}, [createCallerIdsStatus?.status, getCallerIds])
 
 	const scheduleCallHandler = async (e) => {
@@ -113,10 +112,12 @@ export default function HomePage({isConnected}) {
 		const res = await deleteCallerIdApiController(ids);
 		if (res.status !== 200) {
 			showToast('error', 'Failed to delete CallerId');
-			return;
+			setIsTableLoading(false);
+			return false;
 		}
 		setIsTableLoading(false);
 		dispatch(removeCallerId(ids));
+		return true;
 	}
 
 	const deleteSchedule = async (id) => {
@@ -187,7 +188,7 @@ export default function HomePage({isConnected}) {
 				</div>
 			}
 			<div className={classes.register}>
-				<CallerIdsPage user={user}/>
+				<CallerIdsPage user={user} callIdStatus={createCallerIdsStatus?.status}/>
 			</div>
 		</div>
 	</>
