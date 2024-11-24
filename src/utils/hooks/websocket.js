@@ -29,6 +29,7 @@ function useWebSocket(url, options = {}) {
         const { data } = event;
         const message = JSON.parse(data);
         if (message.type === 'CREATE_CALLERIDS') {
+            console.log(message.status, 'message.status', message.data);
             dispatch(updateCallerIdsStatus({ status: message.status, data: message.data }));
         }
     };
