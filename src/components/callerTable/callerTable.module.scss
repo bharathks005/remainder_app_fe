@@ -23,9 +23,29 @@
         }
     }
 
+    .tableloading {
+        opacity: .5;
+    }
+
+    .pagination {
+        margin: 10px auto;
+    }
+
     .table {
+        max-height: 650px;
+        /* Set a fixed height for the table container */
+        overflow-y: auto;
+        /* Enable vertical scrolling */
+        overflow-x: auto;
+        /* Enable horizontal scrolling for wide tables */
         position: relative;
         padding-top: 15px;
+    }
+   
 
+    .totalItems {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 25px;
     }
 }

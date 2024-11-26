@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { addToast } from '../../store/toastSlice';
 import { addCallerId, removeCallerId, updateScheduleData, deleteScheduleData } from '../../store/callerIdsSlice';
 import classes from './home.module.scss';
-import { Spinner, Timeline, Textarea, Button, Card, Label, TextInput } from "flowbite-react";
+import { Select, Spinner, Timeline, Textarea, Button, Card, Label, TextInput } from "flowbite-react";
 import validateDateTimePicker from '../../helper/dateValidation';
 import CallerTableComponent from '../../components/callerTable/callerTable';
 import { HiClock } from "react-icons/hi";
@@ -16,7 +16,7 @@ import {
 	deleteScheduleCallApiController
 } from '../../utils/api/caller-ids.api';
 
-export default function HomePage({isConnected}) {
+export default function HomePage({ isConnected }) {
 	const dispatch = useDispatch();
 	const user = useSelector(state => state.user.user);
 	const { upCommingSchedule = [] } = useSelector(state => state.callerId.scheduledData);
@@ -53,13 +53,11 @@ export default function HomePage({isConnected}) {
 			return;
 		}
 		const callerIds = res.data;
-		if (callerIds.length) {
-			dispatch(addCallerId([...callerIds]));
-		}
+		dispatch(addCallerId({...callerIds}));
 	}
 
 	useEffect(() => {
-		try {			
+		try {
 			if (user?.admin) {
 				getCallerIds();
 				getScheduleData();
@@ -148,6 +146,17 @@ export default function HomePage({isConnected}) {
 											}
 										/>
 									</div>
+									<div className="max-w-md">
+										<div className="mb-2 block">
+											<Label htmlFor="area" value="Select your area" />
+										</div>
+										<Select id="area" name="area" required>
+											<option value="">default</option>
+											<option value="area_1">area 1</option>
+											<option value="area_2">area 2</option>
+											<option value="area_2">area 3</option>
+										</Select>
+									</div>
 									<div>
 										<div className="mb-2 block text-left">
 											<Label htmlFor="notes" value="Notes" />
@@ -188,7 +197,7 @@ export default function HomePage({isConnected}) {
 				</div>
 			}
 			<div className={classes.register}>
-				<CallerIdsPage user={user} callIdStatus={createCallerIdsStatus?.status}/>
+				<CallerIdsPage user={user} callIdStatus={createCallerIdsStatus?.status} />
 			</div>
 		</div>
 	</>

@@ -3,18 +3,24 @@ import { createSlice } from '@reduxjs/toolkit';
 const callerIdsSlice = createSlice({
     name: 'callerId',
     initialState: {
-        callerIds: [],
+        callerIds: {
+            page: 0,
+            limit: 10,
+            totalPages: 0,
+            totalRecords: 0,
+            results: []
+        },
         scheduledData: {},
         createCallerIdsStatus: {}
     },
     reducers: {
         addCallerId: (state, action) => {
-            state.callerIds = [...action.payload];
+            state.callerIds = {...action.payload};
         },
         removeCallerId: (state, action) => {
             return {
                 ...state,
-                callerIds: state.callerIds.filter((item) => !action.payload.includes(item.sid)),
+                callerIds: state.callerIds.results.filter((item) => !action.payload.includes(item.sid)),
             };
         },
         updateScheduleData: (state, action) => {

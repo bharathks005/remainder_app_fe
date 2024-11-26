@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-export async function getCallerIdsApiController() {
+export async function getCallerIdsApiController(pageNumber=1) {
     try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/caller-ids/getOutgoingCallerIds`, { withCredentials: true });
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/caller-ids/getOutgoingCallerIds?page=${pageNumber}`, { withCredentials: true });
         if (response.status !== 200) {
             return {
                 status: response.status,
