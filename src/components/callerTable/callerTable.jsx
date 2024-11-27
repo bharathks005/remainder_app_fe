@@ -1,5 +1,5 @@
-import { Button, Checkbox, Table, Pagination } from "flowbite-react";
-import { HiOutlineTrash } from "react-icons/hi";
+import { TextInput, Button, Checkbox, Table, Pagination } from "flowbite-react";
+import { HiMail, HiOutlineTrash, HiOutlineSearch } from "react-icons/hi";
 import classes from './callerTable.module.scss';
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useCallback } from 'react';
@@ -36,8 +36,7 @@ export default function CallerTableComponent({ isLoading, deleteCallerIDHandler 
     }
 
     const onDeleteHandler = async () => {
-        const result = await deleteCallerIDHandler(selectedId);
-        console.log(result, 'result');
+        await deleteCallerIDHandler(selectedId);
     }
 
     const showToast = useCallback((type, message) => {
@@ -50,7 +49,7 @@ export default function CallerTableComponent({ isLoading, deleteCallerIDHandler 
 
     const onPageChange = async (page) => {
         setLoading(true);
-        const res = await getCallerIdsApiController(page);
+        const res = await getCallerIdsApiController({ page, allRecord: false });
         if (res.status !== 200) {
             showToast('error', 'Failed to get callIds');
             setLoading(false);
@@ -68,17 +67,21 @@ export default function CallerTableComponent({ isLoading, deleteCallerIDHandler 
                 <Spinner color="info" aria-label="loading state" />
             </div>}
 
+            {/* <div className="max-w-full flex justify-end">
+                <TextInput id="name_search" icon={HiOutlineSearch} placeholder="Search By Name" />
+            </div>      */}
+
             {selectedId.length ? <div className={classes.action}>
                 <Button color="failure" onClick={onDeleteHandler}>
                     <HiOutlineTrash className="mr-2 h-5 w-5" />
                     Delete
                 </Button>
             </div> : ''}
+
             <div className={`${classes.table}`}>
                 <Table className={`${loading ? classes.tableloading : ''}`}>
                     <Table.Head>
                         <Table.HeadCell className="p-4">
-                            <Checkbox />
                         </Table.HeadCell>
                         <Table.HeadCell>Name</Table.HeadCell>
                         <Table.HeadCell>Phone</Table.HeadCell>
@@ -90,7 +93,7 @@ export default function CallerTableComponent({ isLoading, deleteCallerIDHandler 
                                     <Table.Cell className="p-4">
                                         <Checkbox onChange={(e) => onSelectHandler(e, callerId.sid)} />
                                     </Table.Cell>
-                                    <Table.Cell>{callerId.displayName}</Table.Cell>
+                                    <Table.Cell>{callerId.friendlyName}</Table.Cell>
                                     <Table.Cell>{callerId.phoneNumber}</Table.Cell>
                                 </Table.Row>
                             ))
@@ -100,12 +103,13 @@ export default function CallerTableComponent({ isLoading, deleteCallerIDHandler 
                 </Table>
             </div>
             {
-                !results.length ? <><span>No Caller ID has been added.</span></> : <>{
+                !results.length ? <><span>No Caller ID has been added.</span></> : <>
+                    {/* {
                     <><span className={classes.totalItems}>
                         Total Items: {totalRecords}
                     </span>
                     </>
-                }
+                } */}
                     <div className="flex overflow-x-auto sm:justify-center">
                         <Pagination className={classes.pagination} currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
                     </div>

@@ -27,8 +27,22 @@
     }
 }
 
+.deletedIdContainer, .availableIdContainer {
+    .title {
+        padding: 15px 0;
+    }
+    .listContainer {
+        padding: 15px 0;
+    }
+}
+
 .upcommingSchedule {
     padding-top: 30px;
+}
+
+.badge {
+    padding: 5px 15px;
+    font-size: 14px;
 }
 
 

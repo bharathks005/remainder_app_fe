@@ -1,5 +1,7 @@
 .toast-conatiner {
-  margin: 0px auto;
-  padding: 0 30px;
-  width: fit-content;
+  position: absolute;
+  bottom: 75px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }

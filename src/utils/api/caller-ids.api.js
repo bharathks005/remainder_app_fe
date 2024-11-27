@@ -1,8 +1,12 @@
 import axios from 'axios';
 
-export async function getCallerIdsApiController(pageNumber=1) {
-    try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/caller-ids/getOutgoingCallerIds?page=${pageNumber}`, { withCredentials: true });
+export async function getCallerIdsApiController(query) {
+   const pageNumber = query?.page || 1;
+   const area = query?.area || '';
+   const allRecord = String(query?.allRecord) || true;
+  
+   try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/caller-ids/getOutgoingCallerIds?page=${pageNumber}&area=${area}&allRecord=${allRecord}`, { withCredentials: true });
         if (response.status !== 200) {
             return {
                 status: response.status,

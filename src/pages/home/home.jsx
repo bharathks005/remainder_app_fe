@@ -3,10 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { addToast } from '../../store/toastSlice';
 import { addCallerId, removeCallerId, updateScheduleData, deleteScheduleData } from '../../store/callerIdsSlice';
 import classes from './home.module.scss';
-import { Select, Spinner, Timeline, Textarea, Button, Card, Label, TextInput } from "flowbite-react";
+import { HR, Badge, Select, Spinner, Timeline, Textarea, Button, Card, Label, TextInput } from "flowbite-react";
 import validateDateTimePicker from '../../helper/dateValidation';
 import CallerTableComponent from '../../components/callerTable/callerTable';
-import { HiClock } from "react-icons/hi";
+import { HiClock, HiOutlineCheck, HiOutlinePencil, HiOutlineX, HiOutlinePlus } from "react-icons/hi";
 import CallerIdsPage from '../callerIds/callerIds';
 import {
 	getCallerIdsApiController,
@@ -21,7 +21,10 @@ export default function HomePage({ isConnected }) {
 	const user = useSelector(state => state.user.user);
 	const { upCommingSchedule = [] } = useSelector(state => state.callerId.scheduledData);
 	const createCallerIdsStatus = useSelector(state => state.callerId.createCallerIdsStatus);
+	const [selectedIds, setSelectedIds] = useState([]);
+	const [deletedIds, setDeletedIds] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
+	const [editMode, setEditMode] = useState(false);
 	const [isTableLoading, setIsTableLoading] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
 	const dateInput = useRef(null);
@@ -47,13 +50,22 @@ export default function HomePage({ isConnected }) {
 	}
 
 	const getCallerIds = async () => {
-		const res = await getCallerIdsApiController();
+		const res = await getCallerIdsApiController({ page: 1, allRecord: false });
 		if (res.status !== 200) {
 			showToast('error', 'Failed to get callIds');
 			return;
 		}
 		const callerIds = res.data;
-		dispatch(addCallerId({...callerIds}));
+		dispatch(addCallerId({ ...callerIds }));
+		const resulsts = callerIds?.results || [];
+		const data = resulsts.map(({ friendlyName, sid }) => {
+			return { friendlyName, sid }
+		});
+		if (data.length) {
+			setSelectedIds([...data]);
+		} else {
+			setSelectedIds([]);
+		}
 	}
 
 	useEffect(() => {
@@ -74,6 +86,52 @@ export default function HomePage({ isConnected }) {
 		}
 	}, [createCallerIdsStatus?.status, getCallerIds])
 
+
+	const areaHandler = async (event) => {
+		const value = event.target.value;
+		const res = await getCallerIdsApiController({ page: 1, area: value });
+		if (res.status !== 200) {
+			showToast('error', 'Failed to get callIds');
+			return;
+		}
+		const callerIds = res.data;
+		const resulsts = callerIds?.results || [];
+		const data = resulsts.map(({ friendlyName, sid }) => {
+			return { friendlyName, sid }
+		});
+		if (data.length) {
+			setSelectedIds([...data]);
+		} else {
+			setSelectedIds([]);
+		}
+		setDeletedIds([]);
+	}
+
+	const unSelectCallerIdHandler = (indx) => {
+		const oldSelectedIds = [...selectedIds];
+		setDeletedIds([
+			...deletedIds,
+			oldSelectedIds[indx]
+		]);
+		oldSelectedIds.splice(indx, 1);
+		setSelectedIds([...oldSelectedIds]);
+	}
+
+	const selectCallerIdHandler = (indx) => {
+		const oldDeletedIds = [...deletedIds];
+		setSelectedIds([
+			...selectedIds,
+			oldDeletedIds[indx]
+		]);
+		oldDeletedIds.splice(indx, 1);
+		setDeletedIds([...oldDeletedIds]);
+	}
+
+	const editIdsHandler = () => {
+		const mode = editMode;
+		setEditMode(!mode);
+	}
+
 	const scheduleCallHandler = async (e) => {
 		e.preventDefault();
 		const formData = new FormData(e.target);
@@ -84,10 +142,15 @@ export default function HomePage({ isConnected }) {
 			setErrorMessage(validateDate.error);
 			return;
 		}
+		if (!selectedIds.length) {
+			showToast('error', 'Please Select the Caller Ids');
+			return;
+		}
 		setErrorMessage('');
 		setIsLoading(true);
+		const selectedCalledIds = selectedIds.map(({ sid }) => sid);
 		try {
-			const response = await scheduleCallApiController({ date, notes });
+			const response = await scheduleCallApiController({ date, notes, selectedIds: selectedCalledIds });
 
 			if (response.status !== 200) {
 				setIsLoading(false);
@@ -113,7 +176,7 @@ export default function HomePage({ isConnected }) {
 			setIsTableLoading(false);
 			return false;
 		}
-		setIsTableLoading(false);
+		setIsTableLoading(false);		
 		dispatch(removeCallerId(ids));
 		return true;
 	}
@@ -135,7 +198,7 @@ export default function HomePage({ isConnected }) {
 						<div className="flex flex-col justify-center w-full md:w-1/2">
 							<Card className="max-w-md">
 								<form className="flex flex-col gap-4" onSubmit={scheduleCallHandler}>
-									<div>
+									<div className="max-w-md">
 										<div className="mb-2 block text-left">
 											<Label htmlFor="dateAndTime" value="Date And Time" />
 										</div>
@@ -150,13 +213,66 @@ export default function HomePage({ isConnected }) {
 										<div className="mb-2 block">
 											<Label htmlFor="area" value="Select your area" />
 										</div>
-										<Select id="area" name="area" required>
+										<Select id="area" name="area" onChange={areaHandler}>
 											<option value="">default</option>
 											<option value="area_1">area 1</option>
 											<option value="area_2">area 2</option>
-											<option value="area_2">area 3</option>
+											<option value="area_3">area 3</option>
 										</Select>
 									</div>
+
+									<Card className="max-w-md">
+										{
+											selectedIds.length ? <div className={`flex justify-end`}>
+												<Button color="gray" className={classes.editBtn} onClick={editIdsHandler}>
+													{!editMode ? <HiOutlinePencil className="h-4 w-4" /> : <HiOutlineX className="h-4 w-4" />}
+												</Button>
+											</div> : <></>
+										}
+										{
+											!editMode ? <>
+												<div className={`flex flex-wrap gap-2 ${classes.listCallerName}`}>
+													{
+														selectedIds.length ? selectedIds.map(({ friendlyName }, indx) => (
+															<Badge className={classes.badge} icon={HiOutlineCheck} key={`users_id_${indx}`} color="info">{friendlyName}</Badge>
+														)) : <>No Caller ID has been added in this selected area</>
+													}
+												</div>
+											</> : <div className={`${classes.editContainer}`}>
+												<div className={`${classes.availableIdContainer}`}>
+													<span className={classes.title}>Selected Caller Ids</span>
+													<div className={`flex flex-wrap gap-2 ${classes.listContainer}`}>
+														{
+															selectedIds.map(({ friendlyName }, indx) => (
+																<Button onClick={() => unSelectCallerIdHandler(indx)} className={classes.deleteCallerIdBtn} key={`users_id_${indx}`} color="light">
+																	<HiOutlineX className="mr-2 h-5 w-5" />
+																	{friendlyName}
+																</Button>
+															))
+														}
+													</div>
+												</div>
+												{
+													deletedIds.length ? <> <HR /><div className={`${classes.deletedIdContainer}`}>
+														<span className={classes.title}>Deleted Caller Ids</span>
+														<div className={`flex flex-wrap gap-2 ${classes.listContainer}`}>
+															{
+																deletedIds.map((item, indx) => (
+																	<Button onClick={() => selectCallerIdHandler(indx)} className={classes.deleteCallerIdBtn} key={`users_id_${indx}`} color="dark">
+																		<HiOutlinePlus className="mr-2 h-5 w-5" />
+																		{item?.friendlyName}
+																	</Button>
+																))
+															}
+														</div>
+													</div></> : <></>
+												}
+
+
+
+											</div>
+										}
+									</Card>
 									<div>
 										<div className="mb-2 block text-left">
 											<Label htmlFor="notes" value="Notes" />

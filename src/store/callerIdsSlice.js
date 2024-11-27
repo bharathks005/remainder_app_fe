@@ -18,9 +18,14 @@ const callerIdsSlice = createSlice({
             state.callerIds = {...action.payload};
         },
         removeCallerId: (state, action) => {
+            const oldData = state.callerIds;
+            const newData = oldData.results.filter((item) => !action.payload.includes(item.sid));
             return {
                 ...state,
-                callerIds: state.callerIds.results.filter((item) => !action.payload.includes(item.sid)),
+                callerIds: {
+                    ...oldData,
+                    results: [...newData],
+                },
             };
         },
         updateScheduleData: (state, action) => {
