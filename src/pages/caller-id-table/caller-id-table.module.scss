@@ -1,6 +1,6 @@
 .tableContainer {
     position: relative;
-    padding: 30px 0;
+    padding: 30px;
 
     .action {
         display: flex;
@@ -32,9 +32,7 @@
     }
 
     .table {
-        max-height: 650px;
-        /* Set a fixed height for the table container */
-        overflow-y: auto;
+        width: fit-content;       
         /* Enable vertical scrolling */
         overflow-x: auto;
         /* Enable horizontal scrolling for wide tables */
@@ -45,7 +43,24 @@
 
     .totalItems {
         display: flex;
-        justify-content: flex-end;
+        justify-content: center;
         padding-top: 25px;
+    }
+
+    .actionBtn {
+        width: fit-content;        
+        padding: 5px;
+        &:hover, &:active {
+            cursor: pointer;    
+            border: 1px solid #ccc;        
+        }
+       
+    }
+
+    .searchInput {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
     }
 }

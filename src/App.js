@@ -1,28 +1,25 @@
 import "./App.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Outlet } from "react-router-dom";
 import HeaderComponent from "./components/ui/header/header";
 import FooterComponent from "./components/ui/footer/footer";
 import ToastComponent from "./components/ui/toast/toast";
 import React, { useEffect, useState } from 'react';
-import { getUserApiController, logoutUserApiController } from './utils/api/user.api';
+import { getUserApiController } from './utils/api/user.api';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateUser, removeUser } from './store/userSlice';
+import { updateUser } from './store/userSlice';
 import { Spinner } from "flowbite-react";
-import HomePage from "./pages/home/home";
 import useWebSocket from './utils/hooks/websocket';
 
 function App() {
     const [isLoading, setIsLoading] = useState(true);
     const protocol = window.location.protocol;
-    const { isConnected } = useWebSocket(`${protocol === 'https:' ? 'wss': 'ws'}://${process.env.REACT_APP_SOCKET_URL}`, {
+    const { isConnected } = useWebSocket(`${protocol === 'https:' ? 'wss' : 'ws'}://${process.env.REACT_APP_SOCKET_URL}`, {
         reconnectInterval: 3000,
         maxReconnectAttempts: 5
     });
     const user = useSelector(state => state.user.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-
-    
 
     useEffect(() => {
         const getUser = async () => {
@@ -33,10 +30,10 @@ function App() {
                     return
                 }
                 const user = res.data;
-                const { name, email, picture, admin, approved } = user;
+                const { name, email, picture, admin, approved, registeredCallerId } = user;
                 if (email) {
                     dispatch(updateUser({
-                        name, email, picture, admin, approved
+                        name, email, picture, admin, approved, registeredCallerId
                     }));
                 }
                 setIsLoading(false);
@@ -45,24 +42,15 @@ function App() {
         getUser();
     }, []);
 
-    const handleLogout = async () => {
-        const res = await logoutUserApiController();
-        if (res.status !== 200) {
-            return
-        }
-        dispatch(removeUser(null));
-        navigate('/login');
-    };
     return (
         <div className="App">
             {
                 isLoading ? <div className="App-loading-icon"><Spinner color="info" aria-label="loading state" /></div> : <>
                     <div className="App-header">
-                        <HeaderComponent user={user} logoutHandler={handleLogout} />
+                        <HeaderComponent />
                     </div>
                     <div className="App-container">
-                        <HomePage isConnected={isConnected} />
-
+                        <Outlet />
                         <div className="toast-conatiner">
                             <ToastComponent />
                         </div>

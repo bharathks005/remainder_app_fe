@@ -27,10 +27,9 @@ function useWebSocket(url, options = {}) {
 
     ws.onmessage = (event) => {
         const { data } = event;
-        const message = JSON.parse(data);
-        if (message.type === 'CREATE_CALLERIDS') {
-            console.log(message.status, 'message.status', message.data);
-            dispatch(updateCallerIdsStatus({ status: message.status, data: message.data }));
+        const results = JSON.parse(data);
+        if (results.type === 'CREATE_CALLERIDS') {
+            dispatch(updateCallerIdsStatus({ status: results.status, message: results.message }));
         }
     };
 

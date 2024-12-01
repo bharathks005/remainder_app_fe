@@ -1,0 +1,60 @@
+.form {
+   margin: 0px auto;
+    .title {
+        padding: 30px 0;
+    }
+    .CallerIdsContainer {
+        padding: 30px;    
+        margin: 0 auto;
+        .pending {
+            opacity: .5;
+            pointer-events: none;
+        }
+    
+        .action {
+            .backBtn {
+                width: fit-content;
+                display: flex;
+                align-items: center;
+                justify-self: start;
+            }
+        }
+    
+        .mainSection {
+            margin: 0 auto;
+            padding: 15px;
+    
+            .badge {
+                width: fit-content;
+                padding: 10px;
+                margin: 15px auto;
+            }
+    
+            .helperText {
+                margin: 10px 0;
+            }
+        }
+    
+        .footer {
+            .retryBtn {
+                width: fit-content;
+                display: flex;
+                align-items: center;
+                justify-self: end;
+            }
+        }
+    
+        .submit {
+            width: fit-content;
+            margin: 15px auto;
+        }
+    }
+}
+
+
+
+@media only screen and (max-width: 768px) {
+    .CallerIdsContainer {
+        padding: 30px;
+    }
+}

@@ -8,12 +8,22 @@ import reportWebVitals from "./reportWebVitals";
 import "./index.css";
 import ErrorPage from "./pages/error/error";
 import LoginPage from './pages/login/login';
+import RegisterCallerIdsPage from './pages/register-callerIds/register-callerIds';
+import CallerIdTablePage from './pages/caller-id-table/caller-id-table';
+import HomePage from './pages/home/home';
+import HeaderComponent from "./components/ui/header/header";
+import FooterComponent from "./components/ui/footer/footer";
 
 const router = createBrowserRouter([
 	{
 		path: "/",
 		element: <App />,
-		errorElement: <ErrorPage />,		
+		errorElement: <ErrorPage />,
+		children: [
+			{ index: true, element: <HomePage /> },
+			{ path: "/lists", element: <CallerIdTablePage /> },
+			{ path: "/register", element: <RegisterCallerIdsPage /> },
+		],
 	},
 	{
 		path: "/login",

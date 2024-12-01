@@ -19,22 +19,8 @@
             }
         }
     }
-
-    .register {
-        .title {
-            padding: 30px 0;
-        }
-    }
 }
 
-.deletedIdContainer, .availableIdContainer {
-    .title {
-        padding: 15px 0;
-    }
-    .listContainer {
-        padding: 15px 0;
-    }
-}
 
 .upcommingSchedule {
     padding-top: 30px;
@@ -45,6 +31,9 @@
     font-size: 14px;
 }
 
+.editBtn {
+    margin-left: 30px;
+}
 
 @media only screen and (max-width: 768px) {
     .scheduleContainer {

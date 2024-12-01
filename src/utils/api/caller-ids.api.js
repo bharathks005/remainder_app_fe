@@ -2,11 +2,10 @@ import axios from 'axios';
 
 export async function getCallerIdsApiController(query) {
    const pageNumber = query?.page || 1;
-   const area = query?.area || '';
-   const allRecord = String(query?.allRecord) || true;
-  
+   const area = query?.area || 'all';
+   const search = query?.search || null;
    try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/caller-ids/getOutgoingCallerIds?page=${pageNumber}&area=${area}&allRecord=${allRecord}`, { withCredentials: true });
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/caller-ids/getOutgoingCallerIds?page=${pageNumber}&area=${area}&search=${search}`, { withCredentials: true });
         if (response.status !== 200) {
             return {
                 status: response.status,
@@ -55,80 +54,6 @@ export async function deleteCallerIdApiController(selectedIds) {
     }
 }
 
-export async function scheduleCallApiController(body) {
-    try {
-        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/schedule-call/create`, body, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            withCredentials: true
-        });
-        if (response.status !== 200) {
-            return {
-                status: response.status,
-                message: 'Failed to Schedule call'
-            }
-        }
-        const data = await response.data;
-        return {
-            status: 200,
-            data
-        }
-    } catch (error) {
-        console.log(error);
-        return {
-            status: 500,
-            message: 'API Error'
-        }
-    }
-}
-
-export async function deleteScheduleCallApiController(id) {
-    try {
-        const response = await axios.delete(`${process.env.REACT_APP_API_URL}/api/schedule-call/${id}`, { withCredentials: true });
-        if (response.status !== 200) {
-            return {
-                status: response.status,
-                message: 'Failed to Delete Schedule call'
-            }
-        }
-        const data = await response.data;
-        return {
-            status: 200,
-            data
-        }
-    } catch (error) {
-        console.log(error);
-        return {
-            status: 500,
-            message: 'API Error'
-        }
-    }
-}
-
-export async function getScheduleApiController() {
-    try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/schedule-call/`, { withCredentials: true });
-        if (response.status !== 200) {
-            return {
-                status: response.status,
-                message: 'failed to get Schedule'
-            }
-        }
-        const data = await response.data;
-        return {
-            status: 200,
-            data
-        }
-    } catch (error) {
-        console.log(error);
-        return {
-            status: 500,
-            message: 'API Error'
-        }
-    }
-}
-
 export async function syncCallerIdsApiController() {
     try {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/caller-ids/syncOutgoingCallerIds`,
@@ -153,14 +78,14 @@ export async function syncCallerIdsApiController() {
     }
 }
 
-export async function craeteCallerIdApiController(body) {
+export async function createCallerIdApiController(body) {
     try {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/caller-ids/createCallerIds`, body, {
             headers: {
                 'Content-Type': 'application/json',
             },
             withCredentials: true
-        });
+        });       
         if (response.status !== 200) {
             return {
                 status: response.status,
@@ -173,9 +98,8 @@ export async function craeteCallerIdApiController(body) {
             data
         }
     } catch (error) {
-        console.log(error);
         return {
-            status: 500,
+            status: error.status === 409 ? 409 : 500,
             message: 'API Error'
         }
     }
