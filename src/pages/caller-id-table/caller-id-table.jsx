@@ -1,19 +1,17 @@
 import { useSelector, useDispatch } from "react-redux";
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import { TextInput, Spinner, Button, Checkbox, Table, Pagination } from "flowbite-react";
-import { HiOutlineTrash, HiOutlinePencil, HiOutlineSearch } from "react-icons/hi";
-
+import { useState, useCallback, useEffect } from 'react';
+import { Spinner, Button, Checkbox, Table, Pagination } from "flowbite-react";
+import { HiOutlineTrash, HiOutlinePencil } from "react-icons/hi";
 import classes from './caller-id-table.module.scss';
 import { addToast } from '../../store/toastSlice';
 import { removeCallerId } from '../../store/callerIdsSlice';
 import { deleteCallerIdApiController } from '../../utils/api/caller-ids.api';
 import { getCallerIdsApiController } from '../../utils/api/caller-ids.api';
-import debounce from 'lodash.debounce';
+import SearchInputComponent from '../../components/search-input/search-input';
 
 export default function CallerIdTablePage() {
     const [isLoading, setIsLoading] = useState(false);
     const user = useSelector(state => state.user.user);   
-    const [searchValue, setSearchValue] = useState('');
     const [callerIds, setCallerIds] = useState({
         totalPages: 0,
         totalRecords: 0,
@@ -42,22 +40,10 @@ export default function CallerIdTablePage() {
         });
         setLoading(false);
     }
-
-    const searchCallerIdHandler = async (e) => {
-        const value = e.target.value || '';
-        setSearchValue(value);
-        getCallerIds(currentPage, value);
-    }
-
-    const debouncedResults = useMemo(() => {
-        return debounce(searchCallerIdHandler, 500);
-    }, []);
-
-    useEffect(() => {
-        return () => {
-            debouncedResults.cancel();
-        };
-    });
+    
+    const handleSeachInputFn = (value = '') => {
+        getCallerIds(1, value);
+    }   
 
     useEffect(() => {
         try {
@@ -115,7 +101,7 @@ export default function CallerIdTablePage() {
                 <Spinner color="info" aria-label="loading state" />
             </div>}
             <div className={classes.searchInput}>
-                <TextInput id="name_search" icon={HiOutlineSearch} onKeyUp={debouncedResults} placeholder="Search By Name" />
+                <SearchInputComponent callbackFn={handleSeachInputFn}/>
             </div>
 
             {selectedId.length ? <div className={classes.action}>

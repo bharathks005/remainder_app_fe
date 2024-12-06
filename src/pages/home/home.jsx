@@ -15,12 +15,13 @@ export default function HomePage() {
 	const dispatch = useDispatch();
 	const user = useSelector(state => state.user.user);
 	const { upCommingSchedule = [] } = useSelector(state => state.callerId.scheduledData);
-	const [selectedIds, setSelectedIds] = useState([]);	
+	const { deletedCallerIds = {} } = useSelector(state => state.scheduleCall);	
 	const [area, setArea] = useState('all');
 	const [isLoading, setIsLoading] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
 	const dateInput = useRef(null);
 	const notesInput = useRef(null);
+	const areaInput = useRef(null);
 
 	const showToast = useCallback((type, message) => {
 		dispatch(addToast({
@@ -57,20 +58,23 @@ export default function HomePage() {
 		const formData = new FormData(e.target);
 		const date = formData.get("dateAndTime");
 		const notes = formData.get("notes");
+		const area = formData.get("area");
 		const validateDate = validateDateTimePicker(date);
+
 		if (!validateDate.isValid) {
 			setErrorMessage(validateDate.error);
 			return;
 		}
-		if (!selectedIds.length) {
-			showToast('error', 'Please Select the Caller Ids');
+		if (!area) {
+			showToast('error', 'Please Select the Area');
 			return;
 		}
+
 		setErrorMessage('');
 		setIsLoading(true);
-		const selectedCalledIds = selectedIds.map(({ sid }) => sid);
+		const deletedIds = Object.keys(deletedCallerIds);
 		try {
-			const response = await scheduleCallApiController({ date, notes, selectedIds: selectedCalledIds });
+			const response = await scheduleCallApiController({ date, notes, deletedIds, area });
 
 			if (response.status !== 200) {
 				setIsLoading(false);
@@ -82,6 +86,8 @@ export default function HomePage() {
 			setIsLoading(false);
 			dateInput.current.value = '';
 			notesInput.current.value = '';
+			areaInput.current.value = 'all';
+			setArea('all');
 		} catch (e) {
 			setIsLoading(false);
 			showToast('error', 'Failed to schedule call');
@@ -96,12 +102,7 @@ export default function HomePage() {
 		}		
 		dispatch(deleteScheduleData(id));
 	}
-
-	const updateSelectedIdsHandler = (ids) => {
-		setSelectedIds(ids)
-	}
-
-
+	
 	return <>
 		<div className={classes.homeContainer}>
 			{
@@ -124,14 +125,14 @@ export default function HomePage() {
 										<div className="mb-2 block">
 											<Label htmlFor="area" value="Select your area" />
 										</div>
-										<Select id="area" name="area" onChange={(e) => setArea(e.target.value)}>
+										<Select id="area" name="area" onChange={(e) => setArea(e.target.value)} ref={areaInput}>
 											<option value="all">default</option>
 											<option value="area_1">area 1</option>
 											<option value="area_2">area 2</option>
 											<option value="area_3">area 3</option>
 										</Select>
 									</div>
-									<SelectedIdsCardComponent area={area} updateSelectedIds={updateSelectedIdsHandler} showToast={showToast}/>
+									<SelectedIdsCardComponent area={area} showToast={showToast}/>
 									<div>
 										<div className="mb-2 block text-left">
 											<Label htmlFor="notes" value="Notes" />

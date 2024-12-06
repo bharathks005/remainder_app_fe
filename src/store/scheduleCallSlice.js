@@ -5,7 +5,7 @@ const scheduleCallSlice = createSlice({
     initialState: {
         upCommingSchedule: [],
         pastSchedule: [],
-        deletedCallerIds: {}
+        deletedCallerIds: {},        
     },
     reducers: {
         updateScheduleData: (state, action) => {
@@ -50,24 +50,26 @@ const scheduleCallSlice = createSlice({
             state.upCommingSchedule = state.scheduledData.upCommingSchedule.filter((item) => item.schedulerName !== id);
         },
         addDeletedCallerIds: (state, action) => {
-            const { sid, displayName } = action.payload;
+            const { _id, displayName } = action.payload;
             const callerIds = {...state.deletedCallerIds};            
-            callerIds[sid] = displayName;
+            callerIds[_id] = displayName;
             state.deletedCallerIds = {
                 ...callerIds
-            };
-            console.log(state.deletedCallerIds, 'state.deletedCallerIds')
+            };           
         },
         removeDeletedCallerIds: (state, action) => {
-            const { sid } = action.payload;
+            const { _id } = action.payload;
             const callerIds = {...state.deletedCallerIds};
-            delete callerIds[sid];
+            delete callerIds[_id];
             state.deletedCallerIds = {
                 ...callerIds
             };
+        },
+        resetDeletedCallerIds: (state, action) => {
+            state.deletedCallerIds = {};
         },
     }
 });
 
-export const { updateScheduleData, deleteScheduleData, addDeletedCallerIds, removeDeletedCallerIds} = scheduleCallSlice.actions;
+export const { updateScheduleData, deleteScheduleData, addDeletedCallerIds, resetDeletedCallerIds, removeDeletedCallerIds} = scheduleCallSlice.actions;
 export default scheduleCallSlice.reducer;

@@ -1,6 +1,6 @@
 .toast-conatiner {
-  position: absolute;
-  bottom: 75px;
+  position: fixed;
+  bottom: 25px;
   display: flex;
   justify-content: center;
   width: 100%;

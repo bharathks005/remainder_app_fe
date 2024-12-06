@@ -1,29 +1,24 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
-import { HiOutlineCheck, HiOutlinePencil, HiOutlineX, HiOutlinePlus, HiOutlineSearch } from "react-icons/hi";
-import { Pagination, HR, Badge, Button, Card, TextInput } from "flowbite-react";
+import { HiOutlineCheck, HiOutlinePencil, HiOutlineX, HiOutlinePlus } from "react-icons/hi";
+import { Pagination, HR, Badge, Button, Card } from "flowbite-react";
 import classes from './card-selected-ids.module.scss';
-import debounce from 'lodash.debounce';
 import { getCallerIdsApiController } from '../../utils/api/caller-ids.api';
-import { removeDeletedCallerIds, addDeletedCallerIds } from '../../store/scheduleCallSlice';
+import { resetDeletedCallerIds, removeDeletedCallerIds, addDeletedCallerIds } from '../../store/scheduleCallSlice';
+import SearchInputComponent from '../search-input/search-input';
 
-export default function SelectedIdsCardComponent({ showToast, area, updateSelectedIds }) {
+export default function SelectedIdsCardComponent({ showToast, area }) {
     const dispatch = useDispatch();
     const { deletedCallerIds = {} } = useSelector(state => state.scheduleCall);
-    const [selectedIds, setSelectedIds] = useState({});
+    const [selectedIds, setSelectedIds] = useState({});    
     const [currentPage, setCurrentPage] = useState(1);
     const [editMode, setEditMode] = useState(false);
     const [callerIds, setCallerIds] = useState({
         totalPages: 1,
         totalRecords: 0,
         results: {}
-    });
-
-    const searchCallerIdHandler = async (e) => {
-        const value = e.target.value || '';
-        getCallerIds(currentPage, value);
-    }
-
+    });    
+ 
     const getCallerIds = async (page = 1, search = null) => {
         const res = await getCallerIdsApiController({ page, area, search });
         if (res.status !== 200) {
@@ -35,31 +30,25 @@ export default function SelectedIdsCardComponent({ showToast, area, updateSelect
             results = [] } = res.data;
         const ids = {};
         const filteredIds = {};
-        results.forEach(({ displayName, sid }) => {
-            ids[sid] = displayName
-            if (!(deletedCallerIds[sid])) {
-                filteredIds[sid] = displayName
+        results.forEach(({ displayName, _id }) => {
+            ids[_id] = displayName
+            if (!(deletedCallerIds[_id])) {
+                filteredIds[_id] = displayName
             }
         });
         setCallerIds({
             totalPages,
             totalRecords,
-            results: {...ids}
+            results: { ...ids }
         });
-        setSelectedIds({...filteredIds});
+        setSelectedIds({ ...filteredIds });
     }
 
-    const debouncedResults = useMemo(() => {
-        return debounce(searchCallerIdHandler, 800);
-    }, []);
-
     useEffect(() => {
-        return () => {
-            debouncedResults.cancel();
-        };
-    });
-
-    useEffect(() => {
+        setSelectedIds({});
+        dispatch(resetDeletedCallerIds({}));
+        setEditMode(false);
+        setCurrentPage(1);
         getCallerIds(1);
     }, [area]);
 
@@ -68,23 +57,28 @@ export default function SelectedIdsCardComponent({ showToast, area, updateSelect
         setCurrentPage(page);
     };
 
-
-    const unSelectCallerIdHandler = (sid) => {
-        const oldSelectedIds = {...selectedIds};        
-        dispatch(addDeletedCallerIds({sid, displayName: oldSelectedIds[sid]}));      
-        delete oldSelectedIds[sid];
-        setSelectedIds({...oldSelectedIds});       
+    const unSelectCallerIdHandler = (_id) => {
+        const oldSelectedIds = { ...selectedIds };
+        const ids = { _id, displayName: oldSelectedIds[_id] };
+        dispatch(addDeletedCallerIds(ids));        
+        delete oldSelectedIds[_id];
+        setSelectedIds({ ...oldSelectedIds });
     }
 
-    const selectCallerIdHandler = (sid) => {
-        const displayName = callerIds.results[sid];
-        dispatch(removeDeletedCallerIds({sid}));
-        if (!(sid in deletedCallerIds)) {
+    const selectCallerIdHandler = (_id) => {
+        const displayName = callerIds.results[_id];
+        dispatch(removeDeletedCallerIds({ _id }));    
+      
+        if (displayName) {
             setSelectedIds({
-                [sid]: displayName,
+                [_id]: displayName,
                 ...selectedIds,
-        });
+            });
         }
+    }
+
+    const handleSeachInputFn = (value = '') => {
+        getCallerIds(1, value);
     }
 
     const editIdsHandler = () => {
@@ -96,7 +90,7 @@ export default function SelectedIdsCardComponent({ showToast, area, updateSelect
         <Card className={`max-w-md ${classes.cardContainer}`}>
             <div className={`flex justify-end ${classes.actionItem}`}>
                 <div>
-                    <TextInput id="name_search" icon={HiOutlineSearch} onChange={debouncedResults} placeholder="Search By Name" />
+                    <SearchInputComponent callbackFn={handleSeachInputFn}/>
                 </div>
                 {
                     Object.values(selectedIds).length ? <div><Button color="gray" onClick={editIdsHandler}>
@@ -110,8 +104,8 @@ export default function SelectedIdsCardComponent({ showToast, area, updateSelect
                         {
                             Object.values(selectedIds).length ? <div className={`flex flex-wrap gap-2 ${classes.callerIdListContainer}`}>
                                 {
-                                    Object.keys(selectedIds).map((sid, indx) => (
-                                        <Badge className={classes.badge} icon={HiOutlineCheck} key={`users_id_${indx}`} color="info">{selectedIds[sid]}</Badge>
+                                    Object.keys(selectedIds).map((_id, indx) => (
+                                        <Badge className={classes.badge} icon={HiOutlineCheck} key={`users_id_${indx}`} color="info">{selectedIds[_id]}</Badge>
                                     ))
                                 }
                             </div> : <span className="text-xs">No Caller ID has been added in this selected area</span>
@@ -121,10 +115,10 @@ export default function SelectedIdsCardComponent({ showToast, area, updateSelect
                             <span className={classes.title}>Selected Caller Ids</span>
                             <div className={`flex flex-wrap gap-2 ${classes.listContainer}`}>
                                 {
-                                    Object.keys(selectedIds).map((sid, indx) => (
-                                        <Button onClick={() => unSelectCallerIdHandler(sid)} className={classes.deleteCallerIdBtn} key={`users_id_${indx}`} color="light">
+                                    Object.keys(selectedIds).map((_id, indx) => (
+                                        <Button onClick={() => unSelectCallerIdHandler(_id)} className={classes.deleteCallerIdBtn} key={`users_id_${indx}`} color="light">
                                             <HiOutlineX className="mr-2 h-5 w-5" />
-                                            {selectedIds[sid]}
+                                            {selectedIds[_id]}
                                         </Button>
                                     ))
                                 }
@@ -135,10 +129,10 @@ export default function SelectedIdsCardComponent({ showToast, area, updateSelect
                                 <span className={classes.title}>Deleted Caller Ids</span>
                                 <div className={`flex flex-wrap gap-2 ${classes.listContainer}`}>
                                     {
-                                        Object.keys(deletedCallerIds).map((sid, indx) => (
-                                            <Button onClick={() => selectCallerIdHandler(sid)} className={classes.deleteCallerIdBtn} key={`users_id_${indx}`} color="dark">
+                                        Object.keys(deletedCallerIds).map((_id, indx) => (
+                                            <Button onClick={() => selectCallerIdHandler(_id)} className={classes.deleteCallerIdBtn} key={`users_id_${indx}`} color="dark">
                                                 <HiOutlinePlus className="mr-2 h-5 w-5" />
-                                                {deletedCallerIds[sid]}
+                                                {deletedCallerIds[_id]}
                                             </Button>
                                         ))
                                     }
