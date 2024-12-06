@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate, NavLink, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { HiX, HiOutlineMenu } from "react-icons/hi";
 import { Avatar, Dropdown, Navbar } from "flowbite-react";
 import { Flowbite } from "flowbite-react";
-import { useNavigate, NavLink, useLocation  } from "react-router-dom";
-import classes from './header.module.scss';
 import { removeUser } from '../../../store/userSlice';
-import { useSelector, useDispatch } from 'react-redux';
 import { logoutUserApiController } from '../../../utils/api/user.api';
-import { HiX, HiOutlineMenu } from "react-icons/hi";
+import classes from './header.module.scss';
 
 export default function HeaderComponent() {
     const dispatch = useDispatch();
@@ -17,9 +17,8 @@ export default function HeaderComponent() {
     const user = useSelector(state => state.user.user);
 
     useEffect(() => {
-        console.log(location.pathname);
         setPathName(location.pathname)
-      }, [location]);
+    }, [location]);
 
     const logoutHandler = async () => {
         const res = await logoutUserApiController();
@@ -44,17 +43,20 @@ export default function HeaderComponent() {
                     </Navbar.Brand>
                     {
                         user && <div className="flex md:order-2">
-                            <div className={`${classes.navigationItem} hidden md:flex`}>
-                                <NavLink to="/" className={`${classes.link} ${pathName === '/' && classes.active}`}>
-                                    <span>Home</span>
-                                </NavLink>
-                                <NavLink to="/lists" className={`${classes.link} ${pathName === '/lists' && classes.active}`}>
-                                    <span>Lists</span>
-                                </NavLink>
-                                <NavLink to="/register" className={`${classes.link} ${pathName === '/register' && classes.active}`}>
-                                    <span>Register</span>
-                                </NavLink>
-                            </div>
+                            {
+                                user.admin && <div className={`${classes.navigationItem} hidden md:flex`}>
+                                    <NavLink to="/" className={`${classes.link} ${pathName === '/' && classes.active}`}>
+                                        <span>Home</span>
+                                    </NavLink>
+                                    <NavLink to="/lists" className={`${classes.link} ${pathName === '/lists' && classes.active}`}>
+                                        <span>Lists</span>
+                                    </NavLink>
+                                    <NavLink to="/register" className={`${classes.link} ${pathName === '/register' && classes.active}`}>
+                                        <span>Register</span>
+                                    </NavLink>
+                                </div>
+                            }
+
                             <Dropdown
                                 arrowIcon={false}
                                 inline
@@ -67,29 +69,32 @@ export default function HeaderComponent() {
                                 </Dropdown.Header>
                                 <Dropdown.Item onClick={() => logoutHandler()}>Sign out</Dropdown.Item>
                             </Dropdown>
-                            <div className={`${classes.navToggle} flex md:hidden`} onClick={toggleNav}>
-                                {
-                                   showNav ? < HiX  className="w-8 h-8" /> : < HiOutlineMenu className="w-8 h-8" />
-                                }
-                            </div>
+                            {
+                                user.admin && <div className={`${classes.navToggle} flex md:hidden`} onClick={toggleNav}>
+                                    {
+                                        showNav ? < HiX className="w-8 h-8" /> : < HiOutlineMenu className="w-8 h-8" />
+                                    }
+                                </div>
+                            }
+
                         </div>
                     }
-                     {
-                showNav && <div className={`${classes.navSessionMobile} w-full md:block md:w-auto md:hidden`}>
-                    <NavLink to="/" className={`${classes.link} ${pathName === '/' && classes.active}`} >
-                        <span>Home</span>
-                    </NavLink>
-                    <NavLink to="/lists" className={`${classes.link} ${pathName === '/lists' && classes.active}`} >
-                        <span>Lists</span>
-                    </NavLink>
-                    <NavLink to="/register" className={`${classes.link} ${pathName === '/register' && classes.active}`} >
-                        <span>Register</span>
-                    </NavLink>
-                </div>
-            }
+                    {
+                        showNav && <div className={`${classes.navSessionMobile} w-full md:block md:w-auto md:hidden`}>
+                            <NavLink to="/" className={`${classes.link} ${pathName === '/' && classes.active}`} >
+                                <span>Home</span>
+                            </NavLink>
+                            <NavLink to="/lists" className={`${classes.link} ${pathName === '/lists' && classes.active}`} >
+                                <span>Lists</span>
+                            </NavLink>
+                            <NavLink to="/register" className={`${classes.link} ${pathName === '/register' && classes.active}`} >
+                                <span>Register</span>
+                            </NavLink>
+                        </div>
+                    }
                 </Navbar>
             </Flowbite >
-           
+
         </>
 
     );
