@@ -86,7 +86,7 @@ export async function createCallerIdApiController(body) {
             },
             withCredentials: true
         });       
-        if (response.status !== 200) {
+        if (response.status !== 200) {            
             return {
                 status: response.status,
                 message: 'Failed to Creata CallerID'
@@ -99,7 +99,31 @@ export async function createCallerIdApiController(body) {
         }
     } catch (error) {
         return {
-            status: error.status === 409 ? 409 : 500,
+            status: [409, 400, 404].includes(error.status) ? error.status : 500,
+            message: 'API Error'
+        }
+    }
+}
+
+export async function inviteCallersApiController() {
+    try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/caller-ids/invite-callers`,
+            { withCredentials: true });
+        if (response.status !== 200) {
+            return {
+                status: response.status,
+                message: 'Failed to get invites'
+            }
+        }
+        const data = await response.data;
+        return {
+            status: 200,
+            data
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            status: 500,
             message: 'API Error'
         }
     }

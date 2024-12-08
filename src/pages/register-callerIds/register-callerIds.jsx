@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Card } from "flowbite-react";
+import { useSearchParams } from 'react-router-dom';
 import classes from './register-callerIds.module.scss';
 import { Select, Button, Badge, Label, TextInput } from "flowbite-react";
-import { HiOutlinePhone, HiOutlineArrowLeft } from "react-icons/hi";
+import { HiOutlinePhone, HiOutlineArrowLeft, HiOutlineDocumentDuplicate } from "react-icons/hi";
 import { Spinner } from "flowbite-react";
-import { createCallerIdApiController } from '../../utils/api/caller-ids.api';
+import { inviteCallersApiController, createCallerIdApiController } from '../../utils/api/caller-ids.api';
 import { addToast } from '../../store/toastSlice';
 import { useDispatch, useSelector } from 'react-redux';
-const { resetCreatestatus } = require('../../store/callerIdsSlice');
+const { resetCreateCallerIdsStatus } = require('../../store/callerIdsSlice');
+
 
 export default function RegisterCallerIdsPage() {
 	const [errorMessage, setErrorMessage] = useState({
@@ -18,7 +20,10 @@ export default function RegisterCallerIdsPage() {
 	const [verificationCode, setVerificationCode] = useState("");
 	const { status = '', message = '' } = useSelector(state => state.callerId.createCallerIdsStatus);
 	const user = useSelector(state => state.user.user);
-	const dispatch = useDispatch();	
+	const [inputValue, setInputValue] = useState("");
+	const [inviteMessage, setInviteMessage] = useState("");
+	const dispatch = useDispatch();
+	const  [searchParams] = useSearchParams();
 
 	const showToast = (type, message) => {
 		dispatch(addToast({
@@ -80,30 +85,32 @@ export default function RegisterCallerIdsPage() {
 			phone: formData.get("phone_number"),
 			displayName: formData.get("display_name"),
 			area: formData.get("area"),
-
-		};
+			id: searchParams.get('id') || ''
+		};		
 		const formValue = data;
 		const isValid = validateForm(formValue);
-
 		if (!isValid) {
 			return;
 		}
-
 		try {
 			setIsLoading(true);
 			data.phone = `+91${data.phone}`;
-			const res = await createCallerIdApiController(data);			
+			const res = await createCallerIdApiController(data);
 			if (res.status !== 200) {
 				setIsLoading(false);
 				if (res.status == 409) {
 					const error = errorMessage;
 					error.displayName = 'Name is already used';
-					setErrorMessage(error);				
+					setErrorMessage(error);
+				} if (res.status === 400) {
+					showToast('error', 'Expired Link. Contact Admin');
+				} else if (res.status === 404) {
+					showToast('error', 'Invalid Request Token not Found');
 				} else {
 					showToast('error', 'Failed to Create CallerID');
 				}
 				return;
-				
+
 			}
 			const { validationCode } = res.data;
 			if (validationCode) {
@@ -117,8 +124,74 @@ export default function RegisterCallerIdsPage() {
 		}
 	};
 
+	const handleCopy = async () => {
+		try {
+			await navigator.clipboard.writeText(inputValue);
+			setInviteMessage("Copied to clipboard!");
+		} catch (err) {
+			console.error("Failed to copy: ", err);
+			setInviteMessage("Failed to copy!");
+		}
+
+		// Clear message after 2 seconds
+		setTimeout(() => setInviteMessage(""), 2000);
+	};
+
+	const inviteCallersHandler = async (e) => {
+		try {
+			setIsLoading(true);
+			const res = await inviteCallersApiController();
+			if (res.status !== 200) {
+				showToast('error', 'Failed to get invite');
+				setIsLoading(false);
+				return;
+			}
+			const link = res.data;
+			setIsLoading(false);
+			setInputValue(link);
+		} catch (e) {
+			setIsLoading(false);
+			showToast('error', 'Failed to get invite');
+			console.error("Submission error:", e);
+		}
+	}
+
 	return (
 		<div className={`${classes.form} w-full`}>
+			{
+				user.admin && <div className={`mt-28 max-w-md ${classes.inviteUsers}`}>
+					<h2 className="text-2xl font-bold mb-4">Invite Callers</h2>
+					<Card className="mt-5 max-w-md">
+						<div className={classes.retry}>
+							{ inputValue.length ? <Button color="dark" className={classes.retryBtn} onClick={() => setInputValue('')}>
+								Retry
+							</Button> : <></>
+							}
+						</div>
+						<div className={classes.inviteInput}>
+							<div className="text-left max-w-md">
+								<div className="mb-2 block">
+									<Label className="align-center" htmlFor="invite_url" value="Invite Link" />
+								</div>
+								<TextInput
+									value={inputValue}
+									id="invite_url"
+									type="text"
+									name="invite_url"
+									placeholder=""
+									readOnly
+								/>
+							</div>
+						</div>
+						{inputValue ? <Button color="gray" className={classes.copyBtn} onClick={handleCopy}>
+							<HiOutlineDocumentDuplicate />
+							<span> Copy</span>
+						</Button> :
+							<Button color="dark" onClick={inviteCallersHandler} className={classes.inviteBtn}>{isLoading ? <Spinner color="info" aria-label="loading state" /> : 'Invite'}</Button>}
+						{inviteMessage && <p className={classes.inviteMessage}>{inviteMessage}</p>}
+					</Card>
+				</div>
+			}
 			<div className={`${classes.CallerIdsContainer} mt-28 max-w-md`}>
 				<h2 className="text-2xl font-bold mb-4">Register Caller ID</h2>
 				<Card className="mt-5 max-w-md">
@@ -126,7 +199,7 @@ export default function RegisterCallerIdsPage() {
 						<form
 							className={`${isLoading ? classes.pending : ''} flex flex-col gap-4`}
 							onSubmit={formSubmitHandler}
-						>							
+						>
 							<div className="text-left max-w-md">
 								<div className="mb-2 block">
 									<Label className="align-center" htmlFor="display_name" value="Display Name" />
@@ -177,7 +250,7 @@ export default function RegisterCallerIdsPage() {
 								<div className={`${classes.action} max-w-md`}>
 									<Button color="light" className={classes.backButton} onClick={() => {
 										setVerificationCode(null);
-										dispatch(resetCreatestatus(null));
+										dispatch(resetCreateCallerIdsStatus(null));
 
 									}}>
 										<HiOutlineArrowLeft className="h-5 w-5" />
@@ -222,7 +295,7 @@ export default function RegisterCallerIdsPage() {
 							{
 								status === 'failed' && <div className={classes.footer}>
 									<Button color="dark" className={classes.retryBtn} onClick={() => {
-										dispatch(resetCreatestatus(null));
+										dispatch(resetCreateCallerIdsStatus(null));
 										setVerificationCode(null);
 									}}> Retry </Button>
 								</div>
