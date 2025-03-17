@@ -8,10 +8,12 @@ import { removeCallerId } from '../../store/callerIdsSlice';
 import { deleteCallerIdApiController } from '../../utils/api/caller-ids.api';
 import { getCallerIdsApiController } from '../../utils/api/caller-ids.api';
 import SearchInputComponent from '../../components/search-input/search-input';
+import ConfirmationModalComponent from '../../components/Modal/ConfirmationModal';
 
 export default function CallerIdTablePage() {
     const [isLoading, setIsLoading] = useState(false);
-    const user = useSelector(state => state.user.user);   
+    const [openModal, setOpenModal] = useState(false);
+    const user = useSelector(state => state.user.user);
     const [callerIds, setCallerIds] = useState({
         totalPages: 0,
         totalRecords: 0,
@@ -70,17 +72,21 @@ export default function CallerIdTablePage() {
         }
     }
 
-    const onDeleteCallerIdHandler = async () => {
-        setIsLoading(true);
-        const res = await deleteCallerIdApiController(selectedId);
-        if (res.status !== 200) {
-            showToast('error', 'Failed to delete CallerId');
+    const onDeleteCallerIdHandler = async (action) => {
+        setOpenModal(false);
+        if (action) {
+            setIsLoading(true);
+            const res = await deleteCallerIdApiController(selectedId);
+            if (res.status !== 200) {
+                showToast('error', 'Failed to delete CallerId');
+                setIsLoading(false);
+                return false;
+            }
+            dispatch(removeCallerId(selectedId));
+            getCallerIds();
             setIsLoading(false);
-            return false;
         }
-        setIsLoading(false);
-        dispatch(removeCallerId(selectedId));
-    }
+    }    
 
     const showToast = useCallback((type, message) => {
         dispatch(addToast({
@@ -95,8 +101,33 @@ export default function CallerIdTablePage() {
         setCurrentPage(page);
     };
 
+    const formSubmitHandler = async () => {
+        
+    }
+
     return (
         <div className={`${classes.tableContainer} w-full`}>
+            <Card className="mt-5 max-w-md">
+					 
+						<form
+							className={`${isLoading ? classes.pending : ''} flex flex-col gap-4`}
+							onSubmit={formSubmitHandler}
+						>
+							<div className="text-left max-w-md">
+								<div className="mb-2 block">
+									<Label className="align-center" htmlFor="area_name" value="Enter the Area Name" />
+								</div>
+								<TextInput
+									id="area_name"
+									type="text"
+									name="area_name"
+									placeholder="Area Name"
+									required
+								/>
+							</div>							
+							<Button color="dark" type="submit" className={classes.submit}>{isLoading ? <Spinner color="info" aria-label="loading state" /> : 'Register'}</Button>
+						</form>
+				</Card>
             {isLoading && <div className={classes.isloading}>
                 <Spinner color="info" aria-label="loading state" />
             </div>}
@@ -105,7 +136,7 @@ export default function CallerIdTablePage() {
             </div>
 
             {selectedId.length ? <div className={classes.action}>
-                <Button color="failure" onClick={onDeleteCallerIdHandler}>
+                <Button color="failure" onClick={() => setOpenModal(true)}>
                     <HiOutlineTrash className="mr-2 h-5 w-5" />
                     Delete
                 </Button>
@@ -149,7 +180,7 @@ export default function CallerIdTablePage() {
                     </div>
                 </>
             }
+            <ConfirmationModalComponent openModal={openModal} callbackAction={onDeleteCallerIdHandler}/>
         </div>
-
     );
 }

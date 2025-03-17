@@ -1,27 +1,23 @@
 import { useState } from "react";
 import { HiOutlineSearch } from "react-icons/hi";
-import { TextInput } from "flowbite-react";
+import { Button, TextInput } from "flowbite-react";
+import classes from './search-input.module.scss';
 
-export default function SearchInputComponent({callbackFn}) {
+export default function SearchInputComponent({ callbackFn }) {
     const [searchTerm, setSearchTerm] = useState("");
 
     const handleInputChange = (event) => {
         setSearchTerm(event.target.value);
     };
 
-    const handleInputBlur = async (e) => {
-        if (!searchTerm.trim().length) {
-            callbackFn();
-        }
+    const searchCallerIdHandler = async () => {
+        callbackFn(searchTerm);
     }
 
-    const searchCallerIdHandler = async (e) => {
-        if (e.key === "Enter" || e.keyCode === 13) {            
-            e.preventDefault();
-            if (searchTerm.trim().length) {
-                callbackFn(searchTerm);
-            }            
-        }
-    }
-    return  <TextInput id="name_search" icon={HiOutlineSearch} onChange={handleInputChange} onBlur={handleInputBlur} onKeyDown={searchCallerIdHandler} placeholder="Search By Name" />
+    return <div className={classes.btnSection}>
+        <TextInput id="name_search" onChange={handleInputChange} placeholder="Search By Name" />
+        <Button  color="gray" onClick={searchCallerIdHandler}>
+            <HiOutlineSearch className="h-4 w-4" />
+        </Button>
+    </div>
 }
