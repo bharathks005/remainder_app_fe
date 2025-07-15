@@ -2,13 +2,11 @@ import { useRef, useCallback, useState, useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { HiClock } from "react-icons/hi";
 import { addToast } from '../../store/toastSlice';
-
 import { updateScheduleData, deleteScheduleData } from '../../store/scheduleCallSlice';
 import classes from './home.module.scss';
 import { Select, Spinner, Timeline, Textarea, Button, Card, Label, TextInput } from "flowbite-react";
 import validateDateTimePicker from '../../helper/dateValidation';
 import { scheduleCallApiController,	getScheduleApiController, deleteScheduleCallApiController } from '../../utils/api/scheduleCall.api';
-
 import SelectedIdsCardComponent from '../../components/card-selected-ids/card.selected-ids';
 
 export default function HomePage() {
@@ -16,6 +14,8 @@ export default function HomePage() {
 	const user = useSelector(state => state.user.user);
 	const { upCommingSchedule = [] } = useSelector(state => state.callerId.scheduledData);
 	const { deletedCallerIds = {} } = useSelector(state => state.scheduleCall);	
+	const callerIds = useSelector(state => state.callerId.callerIds);	
+	const areasEnums = useSelector(state => state.enum.areas);	
 	const [area, setArea] = useState('all');
 	const [isLoading, setIsLoading] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
@@ -127,12 +127,14 @@ export default function HomePage() {
 										</div>
 										<Select id="area" name="area" onChange={(e) => setArea(e.target.value)} ref={areaInput}>
 											<option value="all">default</option>
-											<option value="area_1">area 1</option>
-											<option value="area_2">area 2</option>
-											<option value="area_3">area 3</option>
+											{
+												areasEnums.map(({name}) => (
+													<option value={name} key={name}>{name}</option>
+												))
+											}
 										</Select>
 									</div>
-									<SelectedIdsCardComponent area={area} showToast={showToast}/>
+									<SelectedIdsCardComponent callerIdsData={callerIds} area={area} showToast={showToast}/>
 									<div>
 										<div className="mb-2 block text-left">
 											<Label htmlFor="notes" value="Notes" />

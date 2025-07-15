@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "flowbite-react";
 import { useSearchParams } from 'react-router-dom';
 import classes from './register-callerIds.module.scss';
@@ -8,7 +8,10 @@ import { Spinner } from "flowbite-react";
 import { inviteCallersApiController, createCallerIdApiController } from '../../utils/api/caller-ids.api';
 import { addToast } from '../../store/toastSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { TabItem, Tabs } from "flowbite-react";
+import { getEnumsApiController } from "../../utils/api/enum.api";
 const { resetCreateCallerIdsStatus } = require('../../store/callerIdsSlice');
+
 
 
 export default function RegisterCallerIdsPage() {
@@ -16,14 +19,15 @@ export default function RegisterCallerIdsPage() {
 		phone: "",
 		displayName: ""
 	});
-	const [isLoading, setIsLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);	
+	const areasEnums = useSelector(state => state.enum.areas);
 	const [verificationCode, setVerificationCode] = useState("");
 	const { status = '', message = '' } = useSelector(state => state.callerId.createCallerIdsStatus);
 	const user = useSelector(state => state.user.user);
 	const [inputValue, setInputValue] = useState("");
 	const [inviteMessage, setInviteMessage] = useState("");
 	const dispatch = useDispatch();
-	const  [searchParams] = useSearchParams();
+	const [searchParams] = useSearchParams();	
 
 	const showToast = (type, message) => {
 		dispatch(addToast({
@@ -86,7 +90,7 @@ export default function RegisterCallerIdsPage() {
 			displayName: formData.get("display_name"),
 			area: formData.get("area"),
 			id: searchParams.get('id') || ''
-		};		
+		};
 		const formValue = data;
 		const isValid = validateForm(formValue);
 		if (!isValid) {
@@ -163,7 +167,7 @@ export default function RegisterCallerIdsPage() {
 					<h2 className="text-2xl font-bold mb-4">Invite Callers</h2>
 					<Card className="mt-5 max-w-md">
 						<div className={classes.retry}>
-							{ inputValue.length ? <Button color="dark" className={classes.retryBtn} onClick={() => setInputValue('')}>
+							{inputValue.length ? <Button color="dark" className={classes.retryBtn} onClick={() => setInputValue('')}>
 								Retry
 							</Button> : <></>
 							}
@@ -220,9 +224,11 @@ export default function RegisterCallerIdsPage() {
 								</div>
 								<Select id="area" name="area" required>
 									<option value="">default</option>
-									<option value="area_1">area 1</option>
-									<option value="area_2">area 2</option>
-									<option value="area_2">area 3</option>
+									{
+										areasEnums.map(({ name }) => (
+                                            <option value={name} key={name}>{name}</option>
+                                        ))
+									}
 								</Select>
 							</div>
 							<div className="max-w-md">

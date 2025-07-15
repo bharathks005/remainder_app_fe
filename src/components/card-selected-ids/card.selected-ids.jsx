@@ -7,7 +7,7 @@ import { getCallerIdsApiController } from '../../utils/api/caller-ids.api';
 import { resetDeletedCallerIds, removeDeletedCallerIds, addDeletedCallerIds } from '../../store/scheduleCallSlice';
 import SearchInputComponent from '../search-input/search-input';
 
-export default function SelectedIdsCardComponent({ showToast, area }) {
+export default function SelectedIdsCardComponent({ showToast, area, callerIdsData }) {
     const dispatch = useDispatch();
     const { deletedCallerIds = {} } = useSelector(state => state.scheduleCall);
     const [selectedIds, setSelectedIds] = useState({});    
@@ -44,13 +44,37 @@ export default function SelectedIdsCardComponent({ showToast, area }) {
         setSelectedIds({ ...filteredIds });
     }
 
+    const renderCallerIds = () => {
+        const { totalPages = 0,
+            totalRecords = 0,
+            results = [] } = callerIdsData;       
+        const ids = {};
+        const filteredIds = {};
+        results.forEach(({ displayName, _id }) => {
+            ids[_id] = displayName
+            if (!(deletedCallerIds[_id])) {
+                filteredIds[_id] = displayName
+            }
+        });
+        setCallerIds({
+            totalPages,
+            totalRecords,
+            results: { ...ids }
+        });
+        setSelectedIds({ ...filteredIds });
+    }
+
     useEffect(() => {
         setSelectedIds({});
         dispatch(resetDeletedCallerIds({}));
         setEditMode(false);
-        setCurrentPage(1);
-        getCallerIds(1);
+        setCurrentPage(1);  
+        renderCallerIds();
     }, [area]);
+
+    useEffect(() => {
+        renderCallerIds(); 
+    }, [callerIdsData]);
 
     const onPageChange = async (page) => {
         getCallerIds(page);

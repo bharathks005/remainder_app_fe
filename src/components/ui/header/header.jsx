@@ -48,11 +48,11 @@ export default function HeaderComponent() {
                                     <NavLink to="/" className={`${classes.link} ${pathName === '/' && classes.active}`}>
                                         <span>Home</span>
                                     </NavLink>
-                                    <NavLink to="/lists" className={`${classes.link} ${pathName === '/lists' && classes.active}`}>
-                                        <span>Lists</span>
+                                    <NavLink to="/admin" className={`${classes.link} ${pathName === '/admin' && classes.active}`}>
+                                        <span>Admin</span>
                                     </NavLink>
                                     <NavLink to="/register" className={`${classes.link} ${pathName === '/register' && classes.active}`}>
-                                        <span>Register</span>
+                                        <span>Add User</span>
                                     </NavLink>
                                 </div>
                             }
@@ -84,11 +84,11 @@ export default function HeaderComponent() {
                             <NavLink to="/" className={`${classes.link} ${pathName === '/' && classes.active}`} >
                                 <span>Home</span>
                             </NavLink>
-                            <NavLink to="/lists" className={`${classes.link} ${pathName === '/lists' && classes.active}`} >
-                                <span>Lists</span>
+                            <NavLink to="/admin" className={`${classes.link} ${pathName === '/admin' && classes.active}`} >
+                                <span>Admin</span>
                             </NavLink>
                             <NavLink to="/register" className={`${classes.link} ${pathName === '/register' && classes.active}`} >
-                                <span>Register</span>
+                                <span>Add User</span>
                             </NavLink>
                         </div>
                     }

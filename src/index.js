@@ -9,10 +9,8 @@ import "./index.css";
 import ErrorPage from "./pages/error/error";
 import LoginPage from './pages/login/login';
 import RegisterCallerIdsPage from './pages/register-callerIds/register-callerIds';
-import CallerIdTablePage from './pages/caller-id-table/caller-id-table';
 import HomePage from './pages/home/home';
-import HeaderComponent from "./components/ui/header/header";
-import FooterComponent from "./components/ui/footer/footer";
+import AdminPage from './pages/admin/admin';
 
 const router = createBrowserRouter([
 	{
@@ -21,7 +19,7 @@ const router = createBrowserRouter([
 		errorElement: <ErrorPage />,
 		children: [
 			{ index: true, element: <HomePage /> },
-			{ path: "/lists", element: <CallerIdTablePage /> },
+			{ path: "/admin", element: <AdminPage /> },
 			{ path: "/register", element: <RegisterCallerIdsPage /> },
 		],
 	},

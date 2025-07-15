@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Spinner, Button, Checkbox, Table, Pagination } from "flowbite-react";
 import { HiOutlineTrash, HiOutlinePencil } from "react-icons/hi";
 import classes from './caller-id-table.module.scss';
@@ -9,54 +9,44 @@ import { deleteCallerIdApiController } from '../../utils/api/caller-ids.api';
 import { getCallerIdsApiController } from '../../utils/api/caller-ids.api';
 import SearchInputComponent from '../../components/search-input/search-input';
 import ConfirmationModalComponent from '../../components/Modal/ConfirmationModal';
+import { setCallerIds } from '../../store/callerIdsSlice';
 
-export default function CallerIdTablePage() {
+
+export default function CallerIdTablePage({ open }) {
     const [isLoading, setIsLoading] = useState(false);
     const [openModal, setOpenModal] = useState(false);
-    const user = useSelector(state => state.user.user);
-    const [callerIds, setCallerIds] = useState({
-        totalPages: 0,
-        totalRecords: 0,
-        results: []
-    });
+    const callerIds = useSelector(state => state.callerId.callerIds);
     const [selectedId, setSelectedId] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
 
-    const getCallerIds = async (page=1, search='') => {
+    const getCallerIds = async (page = 1, search = '') => {
         setLoading(true);
-        const res = await getCallerIdsApiController({ page, search});
+        const res = await getCallerIdsApiController({ page, search });
         if (res.status !== 200) {
             showToast('error', 'Failed to get callIds');
             setLoading(false);
             return;
         }
+
         const { totalPages = 0,
             totalRecords = 0,
-            results = [] } = res.data;
-        setCallerIds({
+            results = []
+        } = res.data;
+
+        dispatch(setCallerIds({
+            page,
             totalPages,
             totalRecords,
             results
-        });
+        }));
         setLoading(false);
     }
-    
+
     const handleSeachInputFn = (value = '') => {
         getCallerIds(1, value);
-    }   
-
-    useEffect(() => {
-        try {
-            if (user?.admin) {
-                getCallerIds();
-            }
-        } catch (e) {
-            console.error(e);
-            showToast('error', 'Failed to get callIds');
-        }
-    }, [user]);
+    }
 
     const onSelectHandler = (e, id) => {
         const target = e.target;
@@ -86,7 +76,7 @@ export default function CallerIdTablePage() {
             getCallerIds();
             setIsLoading(false);
         }
-    }    
+    }
 
     const showToast = useCallback((type, message) => {
         dispatch(addToast({
@@ -97,42 +87,17 @@ export default function CallerIdTablePage() {
     }, [dispatch]);
 
     const onPageChange = async (page) => {
-        getCallerIds(page);
-        setCurrentPage(page);
+        setCurrentPage(page);        
+        getCallerIds(page);       
     };
-
-    const formSubmitHandler = async () => {
-        
-    }
 
     return (
         <div className={`${classes.tableContainer} w-full`}>
-            <Card className="mt-5 max-w-md">
-					 
-						<form
-							className={`${isLoading ? classes.pending : ''} flex flex-col gap-4`}
-							onSubmit={formSubmitHandler}
-						>
-							<div className="text-left max-w-md">
-								<div className="mb-2 block">
-									<Label className="align-center" htmlFor="area_name" value="Enter the Area Name" />
-								</div>
-								<TextInput
-									id="area_name"
-									type="text"
-									name="area_name"
-									placeholder="Area Name"
-									required
-								/>
-							</div>							
-							<Button color="dark" type="submit" className={classes.submit}>{isLoading ? <Spinner color="info" aria-label="loading state" /> : 'Register'}</Button>
-						</form>
-				</Card>
             {isLoading && <div className={classes.isloading}>
                 <Spinner color="info" aria-label="loading state" />
             </div>}
             <div className={classes.searchInput}>
-                <SearchInputComponent callbackFn={handleSeachInputFn}/>
+                <SearchInputComponent callbackFn={handleSeachInputFn} />
             </div>
 
             {selectedId.length ? <div className={classes.action}>
@@ -148,8 +113,8 @@ export default function CallerIdTablePage() {
                         <Table.HeadCell className="p-4">
                         </Table.HeadCell>
                         <Table.HeadCell>Name</Table.HeadCell>
-                        <Table.HeadCell>Phone</Table.HeadCell>
-                        {/* <Table.HeadCell>Edit</Table.HeadCell> */}
+                        <Table.HeadCell>Area</Table.HeadCell>
+                        <Table.HeadCell>Edit</Table.HeadCell>
                     </Table.Head>
                     <Table.Body className="divide-y">
                         {
@@ -159,8 +124,8 @@ export default function CallerIdTablePage() {
                                         <Checkbox onChange={(e) => onSelectHandler(e, callerId.sid)} />
                                     </Table.Cell>
                                     <Table.Cell>{callerId.displayName}</Table.Cell>
-                                    <Table.Cell>{callerId.phoneNumber}</Table.Cell>
-                                    {/* <Table.Cell><div className={classes.actionBtn}><HiOutlinePencil /></div></Table.Cell> */}
+                                    <Table.Cell>{callerId.area}</Table.Cell>
+                                    <Table.Cell><div className={classes.actionBtn}><HiOutlinePencil onClick={() => { open(callerId) }} /></div></Table.Cell>
                                 </Table.Row>
                             ))
                         }
@@ -180,7 +145,7 @@ export default function CallerIdTablePage() {
                     </div>
                 </>
             }
-            <ConfirmationModalComponent openModal={openModal} callbackAction={onDeleteCallerIdHandler}/>
+            <ConfirmationModalComponent openModal={openModal} callbackAction={onDeleteCallerIdHandler} />
         </div>
     );
 }

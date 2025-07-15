@@ -89,7 +89,7 @@ export async function createCallerIdApiController(body) {
         if (response.status !== 200) {            
             return {
                 status: response.status,
-                message: 'Failed to Creata CallerID'
+                message: 'Failed to Create CallerID'
             }
         }
         const data = await response.data;
@@ -124,6 +124,33 @@ export async function inviteCallersApiController() {
         console.log(error);
         return {
             status: 500,
+            message: 'API Error'
+        }
+    }
+}
+
+export async function updateCallerIdApiController(body, id) {
+    try {
+        const response = await axios.patch(`${process.env.REACT_APP_API_URL}/api/caller-ids/updateCallerIds?id=${id}`, body, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            withCredentials: true
+        });       
+        if (response.status !== 200) {            
+            return {
+                status: response.status,
+                message: 'Failed to update CallerID'
+            }
+        }
+        const data = await response.data;
+        return {
+            status: 200,
+            data
+        }
+    } catch (error) {
+        return {
+            status: [409, 400, 404].includes(error.status) ? error.status : 500,
             message: 'API Error'
         }
     }

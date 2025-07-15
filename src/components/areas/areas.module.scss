@@ -1,0 +1,25 @@
+.areasContainer {
+    position: relative;
+    padding: 30px;
+    .pending {}
+    .submit {
+        
+    }
+    .areasList {
+        margin-top: 15px;
+        padding-top: 15px;
+    }
+
+    .action {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 15px;
+    }
+    .areasForm {
+        margin: 0px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;       
+    }
+}
